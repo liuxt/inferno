@@ -1,0 +1,9 @@
+4.13 解释器的总体框架
+总体框图如下:
+
+其中interpreter.cpp为顶层模块,为解释器的顶层架构代码.
+第二层的userFileParser.h和userFileParser.cpp为user.sh的解析器,主要是对user.sh进行词法分析和语法分析提取出有关信息,便于第三层生成device和host代码.
+第三层的deviceCodeGenerator.h与deviceCodeGenerator.cpp为device代码生成器. hostCodeGenerator.h与hostCodeGenerator.cpp为host代码生成器.它们使用第二层所得的信息分析并生成串行化部分代码,同时对并行部分进行类型判断并调用第四层的相应模块产生并行部分代码.
+第四层为并行模块代码的生成器. map.h与map.cpp负责生成map部分的并行代码, merge.h与merge.cpp负责生成merge部分的并行代码, reduce.h与reduce.cpp负责生成reduce部分的并行代码.
+第五层的configParser.h与configParser.cpp为template文件解析器.它会读入template文件并将其分块解析并缓存供第六层模块使用. map.template, reduce.template, merge.template为相应并行模块的template供configParser使用.
+第六层的templateConverter.h与templateConverter.cpp接受第五层的缓存信息,并结合上层传递下来的语法分析信息进行模式匹配,生成并行部分代码.

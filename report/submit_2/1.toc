@@ -1,0 +1,31 @@
+
+\select@language {english}
+\contentsline {section}{\numberline {1}可行性研究报告}{3}
+\contentsline {subsection}{\numberline {1.1}理论依据与技术依据}{3}
+\contentsline {subsubsection}{\numberline {1.1.1}Sytx协议及其具体实现}{3}
+\contentsline {subsubsection}{\numberline {1.1.2}ns - 显示当前命名空间}{5}
+\contentsline {subsubsection}{\numberline {1.1.3}bind, mount, unmount - 修改命名空间}{7}
+\contentsline {subsubsection}{\numberline {1.1.4}os - 寄主操作系统接口（对寄生安装的Inferno有效）}{7}
+\contentsline {subsubsection}{\numberline {1.1.5}cpu - 执行一个远程的命令}{8}
+\contentsline {subsubsection}{\numberline {1.1.6}通信模式 - 主从模式}{8}
+\contentsline {subsubsection}{\numberline {1.1.7}file2chan - 节点间通讯}{9}
+\contentsline {subsection}{\numberline {1.2}创新点}{10}
+\contentsline {subsubsection}{\numberline {1.2.1}实现MapReduce计算模型}{10}
+\contentsline {subsubsection}{\numberline {1.2.2}多节点视为整体的一个节点}{10}
+\contentsline {subsubsection}{\numberline {1.2.3}Inferno在64位平台上的移植}{10}
+\contentsline {subsubsection}{\numberline {1.2.4}以外部解释器的形式实现并行计算}{11}
+\contentsline {subsubsection}{\numberline {1.2.5}以C语言而非Limbo语言来编写解释器程序}{11}
+\contentsline {subsubsection}{\numberline {1.2.6}对file2chan的读写方法封装,实现一个文件完成各种类型通讯}{12}
+\contentsline {subsection}{\numberline {1.3}概要设计报告}{12}
+\contentsline {subsubsection}{\numberline {1.3.1}总体路线}{12}
+\contentsline {subsubsection}{\numberline {1.3.2}一个串行程序}{12}
+\contentsline {subsubsection}{\numberline {1.3.3}改写的主从式并行代码}{14}
+\contentsline {paragraph}{master部分}{14}
+\contentsline {paragraph}{worker部分}{16}
+\contentsline {subsubsection}{\numberline {1.3.4}sharedPool - 节点间通讯}{18}
+\contentsline {subsubsection}{\numberline {1.3.5}节点间通讯同步}{19}
+\contentsline {subsubsection}{\numberline {1.3.6}执行效果}{19}
+\contentsline {paragraph}{liuxt-MacBookAir-Invalid-entry-length-DMI-table-is-broken-Stop.log}{20}
+\contentsline {paragraph}{macbook.log}{21}
+\contentsline {paragraph}{master.log}{23}
+\contentsline {subsubsection}{\numberline {1.3.7}Future Work}{26}

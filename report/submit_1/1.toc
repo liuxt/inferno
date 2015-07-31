@@ -1,0 +1,20 @@
+
+\select@language {english}
+\contentsline {section}{\numberline {1}调研报告}{3}
+\contentsline {subsection}{\numberline {1.1}项目背景及实践意义}{3}
+\contentsline {subsubsection}{\numberline {1.1.1}项目的背景}{3}
+\contentsline {subsubsection}{\numberline {1.1.2}分布式操作系统}{4}
+\contentsline {subsubsection}{\numberline {1.1.3}分布式计算}{4}
+\contentsline {subsubsection}{\numberline {1.1.4}分布式系统实现并行计算的主要问题}{5}
+\contentsline {subsubsection}{\numberline {1.1.5}Inferno操作系统}{6}
+\contentsline {subsection}{\numberline {1.2}小组成员相关背景}{7}
+\contentsline {subsection}{\numberline {1.3}立项依据}{8}
+\contentsline {subsubsection}{\numberline {1.3.1}项目意义}{8}
+\contentsline {subsubsection}{\numberline {1.3.2}理论依据}{8}
+\contentsline {paragraph}{资源即文件}{8}
+\contentsline {paragraph}{命名空间}{9}
+\contentsline {paragraph}{使用标准通信协议来访问资源}{9}
+\contentsline {subsection}{\numberline {1.4}目前所调研到的相关工作}{10}
+\contentsline {subsubsection}{\numberline {1.4.1}Inferno相关调研}{10}
+\contentsline {subsubsection}{\numberline {1.4.2}不同平台、模型、操作系统下的分布式计算和并行框架}{10}
+\contentsline {subsubsection}{\numberline {1.4.3}想法来源及可能遇到的挑战}{12}

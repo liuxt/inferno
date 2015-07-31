@@ -1,0 +1,29 @@
+#!/dis/sh -n
+
+load std mpexpr
+
+#i = 2
+#code1
+#code2
+#...
+#code[i-1]
+
+sharedPath = $1
+hostname = `{os hostname}
+workerLogPath = /n/client/pool/$hostname.log
+
+echo $hostname is pending >> $workerLogPath
+
+while {} {
+      current = ${getTask}
+      if {~ $current 'done'} {raise break}
+	echo $hostname fetched $current >> $workerLogPath
+	  (TAP DATA) = $current
+      ANS = ${#function[i]# $DATA} #//function[i]
+      current_ans = ($TAP $ANS)
+	echo $current put_ans : $current_ans >> $workerLogPath      
+      ${writeRequest 'put' $current_ans}
+}
+
+echo ${pid} $hostname is finished >> $workerLogPath
+

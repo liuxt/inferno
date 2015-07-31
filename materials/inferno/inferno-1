@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><title>Debu.gs:  Inferno Part 1:  Shell</title><link rel="stylesheet" media="all" href="/static/stylesheet.css"></link>
+<link rel="alternate" type="application/rss+xml" title="Debu.gs Blog RSS" href="http://debu.gs/blog/feed.rss"></link>
+</head><body><div class="header"><h2 class="tagline">It&#39;s user error.</h2><h1><a href="/">Debu.gs</a></h1></div><hr class="stupid"></hr><div class="navbar"><div class="navlist"><h2>Navigate</h2><ul><li class="nav-entry"><a href="/">Top</a></li><li class="nav-entry"><a href="/blog/archives">All Entries</a></li><li class="nav-entry"><a href="http://debu.gs/blog/feed.rss">RSS</a></li><li class="nav-entry"><a href="/code">Code</a></li><li class="nav-entry"><a href="/about">About</a></li></ul></div><div class="navlist"><h2>GitHub</h2><ul><li class="nav-entry"><a href="http://github.com/pete/pez">pez</a></li><li class="nav-entry"><a href="http://github.com/pete/roboto">roboto</a></li><li class="nav-entry"><a href="http://github.com/pete/watts">watts</a></li><li class="nav-entry"><a href="http://github.com/pete/hoshi">hoshi</a></li><li class="nav-entry"><a href="http://github.com/pete/senga">senga</a></li><li class="nav-entry"><a href="http://github.com/pete/euler">euler</a></li></ul></div><div class="navlist"><h2>Tags</h2><ul><li class="nav-entry"><a href="/tags/awk">awk</a></li><li class="nav-entry"><a href="/tags/c">c</a></li><li class="nav-entry"><a href="/tags/code">code</a></li><li class="nav-entry"><a href="/tags/forth">forth</a></li><li class="nav-entry"><a href="/tags/historic">historic</a></li><li class="nav-entry"><a href="/tags/hoshi">hoshi</a></li><li class="nav-entry"><a href="/tags/inferno">inferno</a></li><li class="nav-entry"><a href="/tags/pez">pez</a></li><li class="nav-entry"><a href="/tags/plan9">plan9</a></li><li class="nav-entry"><a href="/tags/ruby">ruby</a></li><li class="nav-entry"><a href="/tags/site-news">site-news</a></li><li class="nav-entry"><a href="/tags/views">views</a></li><li class="nav-entry"><a href="/tags/wiki">wiki</a></li></ul></div></div><div class="content"><div class="blog-entry"><h2><a href="/entries/inferno-part-1-shell">Inferno Part 1:  Shell</a></h2><span class="byline">Pete Elmore, 2012-05-19 00:40</span><p><strong>Inferno has, hands down, the best shell I have ever used.</strong></p>
+<h3>&#8220;But that&#8217;s a bold statement, and who the hell are you?&#8221;</h3>
+<p>I&#8217;m just a guy on the internet, where bold statments can be and are made without repercussions.  When I heard that they will let just <strong>anyone</strong> have a blog, and they don&#8217;t even care what you say on it, I said &#8220;Sign me up!&#8221;</p>
+<p>Seriously, though, here&#8217;s a little background on shells I&#8217;ve used; you can skip this section if you don&#8217;t care.   I&#8217;ve used bash as my primary shell for quite some time, and have gotten used to its quirks.</p>
+<p>More recently, I&#8217;ve used <a href="http://man.aiju.de/1/rc">rc(1)&zwnj;</a> and had fun.  (For the interested, there&#8217;s an <a href="http://plan9.bell-labs.com/sys/doc/rc.html">introduction to rc</a> by the author of the shell <a href="http://www.lysator.liu.se/c/duffs-device.html">Tom Duff</a>.)  It is of course the default shell on Plan 9, but it also <a href="http://swtch.com/plan9port/">runs on Unix</a>.  On Unix, in the absence of a <a href="http://man.aiju.de/4/plumber">plumber(4)&zwnj;</a>, I usually use <a href="http://utopia.knoware.nl/~hlub/rlwrap/">rlwrap</a> with it.</p>
+<p>I can cope reasonably when presented with csh, tcsh, ksh, zsh, and plain <span class="caps">POSIX</span> sh.  zsh is the most fun of those, but they are all roughly similar except for minor niceties, syntax differences, and interface tweaks.</p>
+<p>So, that should explain somewhat where I&#8217;m coming from.</p>
+<h3>The section after the section that you skip if you don&#8217;t care</h3>
+<p>This one is more code-heavy after the introduction than the previous Inferno post.  I recommend <a href="http://www.vitanuova.com/inferno/downloads.html">downloading and installing Inferno</a> so that you can play with the examples.  (The short version of the installation instructions:  get the tarball, hg pull, hg update, build using a 32-bit machine or 32-bit chroot.)</p>
+<p>Inferno&#8217;s shell, despite author Roger Peppé&#8217;s <a href="http://www.vitanuova.com/inferno/papers/sh.html">modest claims of only minor originality</a>, is radically different.</p>
+<h3>Very different</h3>
+<p>It&#8217;s pretty similar to rc, although the spots where it differs are brilliant.</p>
+<p>In a bare, freshly started shell, there are no conditionals, no loop constructs, no functions, no aliases.  There are lambdas after a fashion, though, in the form of dynamically (as opposed to lexically) scoped blocks with local variables, and variables are lists rather than strings.  Still with me?  You might suspect me of lying about the missing pieces, but I can assure you that I am technically not lying very much at all.</p>
+<p>The lambdas/blocks are simple enough to understand:  they&#8217;re delimited by <code>{</code> and <code>}</code>, and they can have local variables and arguments, which are provided as a list in <code>$*</code>, as a single string in <code>$"*</code>, and individually in <code>$1</code>, <code>$2</code>, <code>$3</code>, etc.</p>
+<h3>Technically not lying very much at all</h3>
+<p>There are <code>&amp;&amp;</code> and <code>||</code>, and one would think that it would be easy to build up an if combinator by means of clever variable usage and lambdas, but that won&#8217;t work:</p>
+<pre><code>; ifc = { $1 &amp;&amp; $2 }
+; $ifc {echo this} {echo worked}
+sh: and: './and' file does not exist</code></pre>
+<p>What happened?  <code>&amp;&amp;</code> and <code>||</code> are just syntactical sugar:</p>
+<pre><code>; echo $ifc
+{and {$1} {$2}}
+; echo $ifc {echo this} {echo worked}
+{and {$1} {$2}} {echo this} {echo worked}</code></pre>
+<p>Huh.  Well, if we wanted, we could make an &#8220;and&#8221; program that did what made this work, right?  (We are ignoring for now that it wouldn&#8217;t work anyway, since the inner blocks have no arguments, and thus <code>$1</code> and <code>$2</code> will be <code>nil</code>.)  You technically could do that, but what you actually want to do is load the std module.</p>
+<h3>Loadable modules&#8230;in a shell!</h3>
+<p>Loadable modules!  Unloadable as well, but that will make sense in a bit.  If you want to do any scripting in such a sparse environment, you&#8217;re crippled without a feature like that.  The presence of loadable modules, in fact, is why the shell can be so spartan but still be so great:  a module can be written to allow the shell access to any library on the system.</p>
+<p>The <a href="http://man.cat-v.org/inferno/1/sh-std">std module</a> provides facilities for flow control (looping, conditionals, exceptions), predicates, list manipulation, functions, and substitution functions.  There are several other libraries which will be introduced as they come up.</p>
+<p>Modules are loaded from <code>/dis/sh</code>, and are expected to conform to a simple interface and to define some &#8220;builtin&#8221; functions.  Straightforward enough, right?</p>
+<p>There are very few builtins that come with the shell, but you can use <code>loaded</code> (which gives a line-separated list of functions and their origin) to check what they are, <code>whatis</code> to see what something is.</p>
+<h3>The basics of flow control.</h3>
+<p>Finally, upon loading the standard library, we get an &#8220;if&#8221;!  It&#8217;s a lot more like Common Lisp&#8217;s <code>cond</code> than a straightforward &#8220;if&#8221; statement, in that it accepts pairs of blocks and expects the first of each pair to be a predicate.</p>
+<pre><code>load std
+if {~ $i 1} {echo '$i was one.'}
+if {~ $i 1} {
+	echo '$i was one.'
+} {! ~ $i 2} {
+	echo '$i was something other than one or two.'
+} {
+	echo '$i was two.'
+}</code></pre>
+<p>The <code>~</code> is the comparison predicate (so as not to clash with <code>=</code>), and the <code>!</code> negates the status of the following command.  (<code>~</code>, as the name suggests, can also match patterns, following the shell&#8217;s globbing rules.)</p>
+<p>The looping constructs (<code>for</code>, <code>while</code>, and <code>apply</code>) act as expected:</p>
+<pre><code>; for i in `{ns} {echo $i | sed 's/.* //'} | sort | uniq
+; i = Hello, World!; while {! ~ $#i 0} {(cur i) = $i; echo $cur}
+; apply {man $1 intro} 1 2 3 4 5 6 7 8 9 10</code></pre>
+<p>In the <code>for</code> example, the backtick followed by braces (<code>`{}</code>) does what a pair of backticks or <code>$()</code> do in bash:  substitutes the output of a command into the arguments for another command.  <code>"{}</code> is similar, but does no parsing of tokens; that is, the output is substituted as a single string.  Try changing the backtick to a double quote and you will see what I mean.</p>
+<p>The while example uses a couple of other new things:  <code>$#i</code> returns the number of elements in <code>$i</code>, and the <code>(cur i) = $i</code> splits the first item out of the list <code>$i</code>, assigning it to <code>$cur</code>, and then assigns the rest to <code>$i</code>.  I don&#8217;t know of an equivalent in bash that is as simple, but it behaves roughly like the following assignment in Ruby: <code>cur, *i = i</code>.</p>
+<p><code>apply</code> is roughly equivalent to <code>for</code>, but without an explicit variable and with the block preceding the arguments to apply the block to.  You can use one to simulate the other, in fact:</p>
+<pre><code>for i in 1 2 3 { {echo $1} $i }
+apply { i = $1; {echo $i} } 1 2 3</code></pre>
+<h3>Functions, substitution functions</h3>
+<p>Functions are syntactically nice and are simple due to the semantics of blocks in Inferno:</p>
+<pre><code>; fn greet {
+	name = $1
+	if {~ $#name 0} { name = World }
+	echo Hello, $name!
+}
+; greet
+Hello, World!
+; greet everybody
+Hello, everybody!
+; whatis greet
+load std; fn greet {name=$1;if {~ $#name 0} {name=World};echo Hello, $name^!}</code></pre>
+<p>You can, like any other command, capture its output:</p>
+<pre><code>; greeting = "{greet}
+; echo The greeting is '"'^$greeting^'"'
+The greeting is "Hello, World!
+"</code></pre>
+<p>The carats (<code>^</code>) are a join operator of sorts; they are used to separate tokens without inserting a space.  The only quoting operator for literal strings is the humble tick (or &#8220;single-quote&#8221;, but anyway it&#8217;s this guy: <code>'</code>).  Since the double-quote is used elsewhere in the syntax of the shell, you&#8217;ll need to escape it where it is used.</p>
+<p>But that&#8217;s a little clunky if the function&#8217;s main purpose is to generate a string for you to keep around, and this is where substitution functions come in.  Substitution functions are declared similarly to functions but are called differently (with <code>${}</code>) and their purpose is to be substituted into a command rather than to act as standalone commands:</p>
+<pre><code>; subfn greeting {
+	name=$1
+	and {~ $#name 0} {name=World}
+	result = Hello, $name!
+} 
+; echo ${greeting}
+Hello, World!
+; echo ${greeting Charles Forsyth}
+Hello, Charles!
+; echo ${greeting 'Charles Forsyth'}
+Hello, Charles Forsyth!</code></pre>
+<p>There are a few substitution functions built into the shell and several that come from the std library.</p>
+<p>Functions and substitution functions are stored as environment variables and are available to subshells as a result.  Functions get the &#8220;fn-&#8221; prefix, and substitution functions get &#8220;sfn-&#8221;.  And since /env is a filesystem:</p>
+<pre><code>; cat /env/fn-greet
+'{name=$1;if {~ $#name 0} {name=World};echo Hello, $name^!}'</code></pre>
+<h3>Environment variables</h3>
+<p>As mentioned above, <code>/env</code> is a filesystem representing the current process&#8217;s environment variables.  No more big block of <span class="caps">NULL</span>-terminated strings in a <span class="caps">NULL</span>-terminated <code>extern char **environ;</code> as in C, thus the shell&#8217;s job in managing environment variables gets easier.  In Unix, even if you wanted to, you&#8217;d have a hard time getting a different process&#8217;s environment, the environment being a chunk of memory at some location inside the process.  However, in Inferno, it&#8217;s a filesystem, mounted on /env by default.</p>
+<p>Environment variables can be enumerated with <code>ls -p /env</code>.  Not only that, but propagating changes is a completely different game altogether.  Remember <a href="http://man.cat-v.org/inferno/1/listen">listen(1)&zwnj;</a> and <a href="http://man.cat-v.org/inferno/1/export">export(1)&zwnj;</a>?  If you felt like it, you could export /env and give outside processes access to the current one&#8217;s environment variables.</p>
+<h3>Math</h3>
+<p>Mathematical expressions in the shell are taken care of by means of the <a href="http://man.cat-v.org/inferno/1/sh-expr">expr(1) and mpexpr(1)&zwnj;</a> libraries for 64-bit integer math and infinite-precision integer math, respectively.  They both provide the same interface:  a substitution builtin <code>${expr ...}</code> and a regular builtin function <code>ntest</code> which returns false for zero and true otherwise.  <code>${expr}</code> gives you a simple, stack-based calculator that anyone familiar with <a href="http://man.cat-v.org/plan_9/1/dc">dc(1)&zwnj;</a> or <a href="http://c2.com/cgi/wiki?ForthLanguage">Forth</a> or <a href="http://en.wikipedia.org/wiki/HP_calculators">HP calculators</a> should be comfortable with.  It misses some stack manipulation operations but is otherwise a standard <span class="caps">RPN</span> math language:</p>
+<pre><code>; load expr
+; echo ${expr 5 2 3 + '*'}
+25
+; load std
+; i = 10; while {ntest ${expr $i 5 -}} {echo -n $i^' '; i = ${expr $i 1
+-}}; echo
+10 9 8 7 6</code></pre>
+<p>Note the quoting around the multiplication operator, to prevent the asterisk from being expanded.  If you prefer to not have to quote, there are equivalents that are not special characters for anything that needs quoting (e.g., &#8216;x&#8217; is equivalent to &#8216;*&#8217;).</p>
+<p>Here&#8217;s a naive primality test:</p>
+<pre><code>; fn isprime {
+	n = $1
+	rescue composite {status false} {
+		i = 2
+		while {ntest ${expr $i $n '&lt;'}} {
+			! ntest ${expr $n $i %} &amp;&amp; raise composite
+			i = ${expr $i 1 +}
+		}
+	}
+}
+; subfn primestr {
+	n = $1
+	result = $n is composite
+	isprime $n &amp;&amp; result = $n is prime
+}
+; echo ${primestr 20}
+20 is composite
+; echo ${primestr 23}
+23 is prime</code></pre>
+<p>If you look at it closely, there is a bug in the above.  I&#8217;ll avoid spoiling it in this paragraph if you want to try to spot it.</p>
+<p>First, though, you may have noticed the use of <code>rescue</code> and <code>raise</code>.  The std library implements exceptions, thinly wrapping the Limbo facilities for excemption-handling.  They behave as expected, although it&#8217;s recommended they be used sparingly.</p>
+<p>The small bug:  <code>n</code> is an environment variable, so <code>primestr</code> and <code>isprime</code> will be sharing the same <code>n</code>!  Only by luck have we avoided a bug here.  Ouch.  Luckily, blocks can have local variables:</p>
+<pre><code>; n = 5; { n = 6 }; echo $n
+6
+; n = 5; { n := 6 }; echo $n
+5</code></pre>
+<p>So, you can recurse to your heart&#8217;s content:</p>
+<pre><code>; subfn factorial {
+	(n r) := $1 1
+	and {! ~ $n 0} {r = ${expr ${factorial ${expr $n 1 -}} $n '*'}}
+	result = $r
+}
+; echo ${factorial 15}
+1307674368000
+; echo ${factorial 21}
+-4249290049419214848</code></pre>
+<p>Oops.  21! is a 66-bit number.  But no problem!</p>
+<pre><code>; unload expr
+; load mpexpr
+; echo ${factorial 21}
+51090942171709440000
+; for i in ${expr 15 26 seq} { echo ${factorial $i} } | mc
+1307674368000               51090942171709440000
+20922789888000              1124000727777607680000
+355687428096000             25852016738884976640000
+6402373705728000            620448401733239439360000
+121645100408832000          15511210043330985984000000
+2432902008176640000         403291461126605635584000000</code></pre>
+<p>mpexpr is slightly slower, of course, but not noticably so for any math you might want to do in the shell.</p>
+<p>As a side note, <a href="http://man.cat-v.org/inferno/1/mc">mc(1)&zwnj;</a> in Inferno and <a href="http://man.cat-v.org/plan_9/1/mc">in Plan 9</a> columnates its input and prints it to standard output.  This was a feature singled out in Rob Pike and Brian Kernighan&#8217;s <span class="caps">USENIX</span> presentation &#8220;<span class="caps">UNIX</span> Style, or cat -v Considered Harmful&#8221; and in <a href="http://harmful.cat-v.org/cat-v/">Program Design in the <span class="caps">UNIX</span> Environment</a>.</p>
+<h3>Fetching web pages</h3>
+<p>What&#8217;s the fun in a computer that doesn&#8217;t talk to the internet at large?  And the web is a pretty vast slice of it.  Now that we have a good grip on the semantics of blocks, let&#8217;s play with a command that makes good use of them.  If you don&#8217;t have the connection server or the <span class="caps">DNS</span> server running, you&#8217;ll need to run <a href="http://man.cat-v.org/inferno/8/cs">ndb/cs</a> and <a href="http://man.cat-v.org/inferno/8/dns">ndb/dns</a> to start them up.  They power <code>/net/cs</code> and <code>/net/dns</code>, respectively, and you&#8217;ll want those if you have the urge to talk to the network.  There are a few <span class="caps">HTTP</span> clients for Inferno, but we&#8217;re going to build one in the shell, if you won&#8217;t mind a bit of a digression first.</p>
+<h4>A brief digression about carriage returns</h4>
+<p><span class="caps">HTTP</span> requires <span class="caps">CRLF</span> (&#8220;\r\n&#8221;, &#8220;0&#215;0d0a&#8221;, etc.) to terminate lines.  To get this in Inferno, you just need to type <code>^M</code>.</p>
+<p>We&#8217;ve got to diverge here, somewhat, depending on if you have started the window manager and a shell inside it or if you are using a bare shell (no graphical environment, just &#8216;emu&#8217; running inside a VT100).  We&#8217;ll set up a <code>$cr</code> variable to hold a carriage return, and then the next section will work the same no matter what you&#8217;re doing.</p>
+<p>In the Inferno shell, running under a window manager, (recommended) this is easy:</p>
+<pre><code>; cr = '^M'</code></pre>
+<p>Note that that&#8217;s control+M, not a carat followed by a capital M.  The shell will print a special character indicating that it&#8217;s a CR, and you&#8217;ll have to surround it by quotes, since it&#8217;s a whitespace character.</p>
+<p>If you&#8217;re using the shell in a hosted environment without starting up a window manager, you&#8217;ll feel some pain here:</p>
+<pre><code>; echo '^M' | xd
+0000000 0a0a0000
+0000002</code></pre>
+<p>Oops.  In hosted Inferno running in a VT100 emulator (xterm, rxvt, etc., I like urxvt), we&#8217;re going to have to be a little more clever:</p>
+<pre><code>; cr = "{os awk 'BEGIN{printf("\r")}'}</code></pre>
+<p>You could also write a brief Limbo program that prints a single \r if you don&#8217;t want to use <a href="http://man.cat-v.org/inferno/1/os">os(1)&zwnj;</a> <strong>or</strong> start the window manager.  <code>os</code>, as you may have suspected (or read if you clicked the link to the man page), runs a command on the host OS.  There are some caveats but it does roughly what you expect for the most part.</p>
+<h4>Back to the web</h4>
+<p>Now that we have <code>$cr</code> set up, we can do this:</p>
+<pre><code>; fn bcurl {
+	(h p) = $1 $2
+	dial -A 'tcp!'^$h^'!80' {
+		echo Connected &gt;[1=2]
+		echo 'GET '^$p^' HTTP/1.0'^$cr
+		echo 'Host: '^$h^$cr
+		echo 'User-Agent: Inferno Shell Barbarian Curl'^$cr
+		echo $cr
+		echo Request made &gt;[1=2]
+		cat &gt;[1=3]
+		echo Done &gt;[1=2]
+	} &gt;[3=1]
+}
+bcurl reverso.be /</code></pre>
+<p>That&#8217;ll fetch a page and send it to standard output (including headers and everything), with diagnostics sent to standard error, in a sort of barbaric version of <a href="http://curl.haxx.se/">curl(1)&zwnj;</a> that only accounts for the most common use case.  <a href="http://man.cat-v.org/inferno/1/listen">dial(1)&zwnj;</a> connects to the specified address, and then executes the provided block, with the block&#8217;s standard input and standard output wired up to the connection.</p>
+<p>There are two things that won&#8217;t make sense here if you are used to, e.g., bash:  the fact that <code>$cr</code> goes unescaped when used (causing, no doubt, the seasoned bash user to cringe in chilling apprehension, recalling the destruction of the root filesystem on a production machine after running a script that didn&#8217;t quote its variables), and the redirection operators.</p>
+<p>In Inferno&#8217;s shell, you escape things once, and never have to worry again.  Everything is parsed once (unless you use the <code>${parse}</code> substitution function), so there&#8217;s no need to worry.  For example, in bash:</p>
+<pre><code>$ fourspaces='    '
+$ echo a $fourspaces b
+a b</code></pre>
+<p><code>echo</code> only sees &#8216;a&#8217; and &#8216;b&#8217;, and prints them separated by a space.  However, in Inferno:</p>
+<pre><code>; fourspaces = '    '
+; echo a $fourspaces b
+a      b</code></pre>
+<p>That is, <code>echo</code> receives three arguments, &#8216;a&#8217;, &#8217;    &#8216;, and &#8217;b&#8217;, and prints them with spaces separating them, resulting in six spaces between a and b.</p>
+<p>The second is a somewhat nicer syntax for FD manipulation.  <code>&gt;[1=2]</code> redirects standard output to standard error, as with bash&#8217;s <code>&gt;&amp;2</code>.  <code>&gt;[1=3]</code> sends standard output to the newly opened FD 3, which we then send back to standard output by means of <code>&gt;[3=1]</code>.  The same works for pipes, of course.</p>
+<pre><code>; {echo Hello &gt;[1=2]; echo World} |[2] tr l b
+World
+Hebbo</code></pre>
+<p>That&#8217;s technically possible in bash with some amount of FD swapping, but it&#8217;s somewhat ugly and if there&#8217;s a way to do it without subshells, I don&#8217;t know:</p>
+<pre><code>$ ((echo Hello &gt;&amp;2; echo World &gt;&amp;3) |&amp; tr l b) 3&gt;&amp;1
+World
+Hebbo</code></pre>
+<p>I can&#8217;t see the example getting much more complex without running past my capacity to manage it. The extra FD being required (as far as I can tell, unless you invoke another sub-shell; <code>|&amp;</code> redirects stdout and stderr, so stdout has to be saved elsewhere) is a bigger problem than one might expect, as bash warns on <a href="http://linux.die.net/man/1/bash">its man page</a> that one ought not to attempt using file descriptors higher than 10.  I wouldn&#8217;t attempt something like the above bcurl function in bash, but if anyone can get something like that working (using bash&#8217;s weird network support), it would be interesting to see.</p>
+<h3>Loadable as a module</h3>
+<p>The Inferno shell is also a loadable module for Limbo programs.  Where in most Unix systems <code>exec()</code>ing <code>sh -c</code> is somewhat popular, in Inferno, it&#8217;s unnecessary.  You just load the <a href="http://man.cat-v.org/inferno/2/sh">sh(2)&zwnj;</a> module into your Limbo program and run programs, parse commands, glob patterns, etc., as much as you like.</p>
+<p>Not only does this make rewriting shell functionality unnecessary, it lets you use the shell as a Lua-style scripting engine for your application.  It also allows you the freedom to slap whatever <span class="caps">GUI</span> you like on top of the shell without much problem.  The one that ships with Inferno is <a href="http://man.cat-v.org/inferno/1/wm-sh">wm/sh</a>, although <a href="http://bitbucket.org/mjl/wmrun">wmrun</a> is a good example of a different UI.  Based on how much I love typing <code>:%!</code> in vim and <code>|</code> in <a href="http://man.cat-v.org/plan_9/1/sam">sam(1)&zwnj;</a>, I&#8217;ve been thinking about playing with an interface that treats the shell and commands&#8217; output similarly, but that&#8217;s a later project.</p>
+<h3>I told you it was different</h3>
+<p>I think this covers enough of the Inferno shell to illustrate how powerful it is compared to more common shells, and exactly what is so different when compared to bash.  Hopefully by this point you believe me.</p>
+<h3>Next up</h3>
+<p>I&#8217;ve another article or two planned to cover more of the shell.  There is so much you can do with it that it&#8217;s hard to cover all the ground in one post.  I&#8217;ve de-scoped, so to speak, <a href="http://man.cat-v.org/inferno/1/sh-tk">sh-tk(1)&zwnj;</a> and covering the reason Inferno doesn&#8217;t have a version of awk:  you can do it in the shell via getline, <a href="http://man.cat-v.org/inferno/1/sh-regex">sh-regex(1)&zwnj;</a>, and <a href="http://man.cat-v.org/inferno/1/sh-string">sh-string(1)&zwnj;</a> (although awk&#8217;s syntax would be nice to have).</p>
+<p>I&#8217;m also very interested in explaining the <a href="http://man.cat-v.org/inferno/8/plumber">plumber(8)&zwnj;</a>.  This will likely be tied into the Tk article, since the example I have in mind involves plumbing.</p>
+<p>The auth stuff is slightly more easy to wrap your head around using than the shell.  I&#8217;m still tinkering with it, but I plan an entry on getting machines to authenticate with each other, centralizing your home directory, and then building a couple of simple distributed applications (like, for example, a simple application of the filter/map/reduce pattern, a prime sieve, or something along those lines).  A step-by-step guide to using it seems a little difficult to find, though, so I&#8217;d like to cover it.</p>
+<p>For the reasons mentioned in the previous articles, I kind of want to avoid the Inferno versus <span class="caps">BEAM</span> comparison article, but it&#8217;s getting more tempting all the time.</p>
+<p>So following this, in order of probability, an article on auth and building a cluster, one on text processing in the shell, one on Tk in the shell, and one comparing and contrasting Inferno and Erlang&#8217;s <span class="caps">BEAM</span>.</p>
+<h3>Small update</h3>
+<p>I&#8217;ve <a href="http://news.ycombinator.com/item?id=3995002">submitted this article to Hacker News</a>, although my suspicion is that submitting it after-hours on a Friday will not get it much attention.</p>
+<h3>Errata (2012/06/07)</h3>
+<p>I had not encountered the <a href="http://man.cat-v.org/inferno/1/unicode">unicode(1)&zwnj;</a> command before writing this entry.  Rather than <code>os awk</code> to get a CR, it suffices to use <code>"{unicode D}</code>.  Much nicer.</p><p class="tags">Tags:  <a href="/tags/code">code</a> <a href="/tags/inferno">inferno</a> </p><hr></hr><a href="/entries/inferno-part-0-namespaces" style="float: left;">&lt;&lt; Previous: &quot;Inferno Part 0:  Namespaces&quot;</a><br style="clear: all;">
+<a href="/entries/inferno-part-2-let-s-make-a-cluster" style="float: right;">Next: &quot;Inferno Part 2:  Let&#39;s Make a Cluster!&quot; &gt;&gt;</a><br style="clear: all;">
+</div></div><br style="clear: both;">
+<div class="footer"><span class="contact">					Contact:  pete at debu dot gs
+</span><span class="phrases">In vinculis etiam audax.</span><br style="clear: both;">
+</div></body></html>

@@ -1,0 +1,7 @@
+auth/createsigerkey `{cat /dev/sysname} ; 产生公钥
+svc/auth ; 设置认证密码（每次重做这部都要来一次）
+auth/changelogin USERNAME ; USERNAME是你要创建的账户的名字
+getauthinfo default ; 默认必做
+use signer 填IP地址
+remote user name 填要连接的远程端账户名
+

@@ -1,0 +1,22 @@
+5.并行计算框架的安装与用法
+
+5.1 安装方法
+由于需要较多的源文件混合编译,我们采取使用GNU automake 和 autoconf套装进行自动化编译.用户需先安装>=1.11的automake以及>=2.13的autoconf.然后进入源文件夹执行./configure进行自动配置.然后再通过make,完成自动编译.最终通过make install将程序安装在/usr/bin中.若想清理编译的中间文件可执行make clean.
+
+5.2 配置device_ip
+在运行并行程序之前,我们需要配置device的IP地址.配置十分简单,只需在源文件夹里创建device_ip这一文件,首先填127.0.0.1代表localhost地址即host地址.接着再填入各个device的IP地址,注意各个地址之间需空一格.
+示例 : 127.0.0.1 192.168.0.1 192.168.0.2
+
+5.3 user.sh的编写
+用户首先需编写user.sh,然后经解释器翻译成并行化代码再执行.所以user.sh的编写非常重要.
+user.sh的语法格式和Inferno Shell及其相似.其中串行部分格式和Inferno Shell完全相同.并行部分格式如下:
+@parallel_begin
+parallel code blocks.....
+@parallel_end
+其中parallel code blocks可以是map, reduce和merge.
+一个完整的user.sh示例如下:
+
+5.4执行并行化程序
+
+5.5一个完整的执行过程
+

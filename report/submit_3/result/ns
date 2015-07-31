@@ -1,0 +1,20 @@
+; ns
+bind / /
+bind -ac '#U' /
+bind /dev /dev
+bind -b '#^' /dev
+bind /chan /chan
+bind -b '#^' /chan
+bind -b '#m' /dev
+bind -b '#c' /dev
+bind '#p' /prog
+bind '#d' /fd
+bind /net /net
+bind -a '#I' /net
+bind -a /dev /dev
+bind -a /net /net
+bind /net.alt /net.alt
+bind -a /net.alt /net.alt
+bind -c '#e' /env
+cd /
+;

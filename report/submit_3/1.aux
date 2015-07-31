@@ -1,0 +1,101 @@
+\relax 
+\@writefile{toc}{}
+\providecommand \oddpage@label [2]{}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}调研报告}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}项目背景及实践意义}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.1}项目的背景}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.2}分布式操作系统}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.1}{\ignorespaces 分布式操作系统的架构\relax }}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.3}分布式计算}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.4}分布式系统实现并行计算的主要问题}{6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.5}Inferno操作系统}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.2}{\ignorespaces Inferno的架构\relax }}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}小组成员相关背景}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}立项依据}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.1}项目意义}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.2}理论依据}{9}}
+\@writefile{toc}{\contentsline {paragraph}{资源即文件}{9}}
+\@writefile{toc}{\contentsline {paragraph}{命名空间}{10}}
+\@writefile{toc}{\contentsline {paragraph}{使用标准通信协议来访问资源}{10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}目前所调研到的相关工作}{11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.1}Inferno相关调研}{11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.2}常见并行框架概况}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.3}{\ignorespaces OpenMP原理\relax }}{12}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.1}{\ignorespaces 各种并行计算框架对比\relax }}{13}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}OpenCL调研}{13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.1}简介}{13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.2}主机设备交互}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.3}OpenCL架构}{14}}
+\@writefile{toc}{\contentsline {paragraph}{平台模型}{14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.4}{\ignorespaces OpenCL的平台模型--host~\&~device模型\relax }}{15}}
+\@writefile{toc}{\contentsline {paragraph}{执行模型}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.5}{\ignorespaces OpenCL's kernel\relax }}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.6}{\ignorespaces OpenCL的内存模型\relax }}{17}}
+\@writefile{toc}{\contentsline {paragraph}{内存模型}{18}}
+\@writefile{toc}{\contentsline {paragraph}{编程模型}{18}}
+\@writefile{toc}{\contentsline {paragraph}{OpenCL软件框架}{18}}
+\@writefile{toc}{\contentsline {paragraph}{OpenCL实现原理}{19}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}MPI调研}{19}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.1}MPI数据类型}{19}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.2}通信域}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.3}MPI调用接口}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.4}MPI并行编程模式}{21}}
+\@writefile{toc}{\contentsline {paragraph}{主从模式}{21}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.7}{\ignorespaces MPI主从模式\relax }}{22}}
+\@writefile{toc}{\contentsline {paragraph}{对等模式}{23}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.8}{\ignorespaces MPI对等模式\relax }}{23}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}想法来源及可能遇到的挑战}{23}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}可行性研究报告}{24}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}理论依据与技术依据}{24}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.1}Sytx协议及其具体实现}{24}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.2}ns - 显示当前命名空间}{27}}
+\@writefile{lol}{\contentsline {lstlisting}{result/ns}{27}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.3}bind, mount, unmount - 修改命名空间}{28}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.4}os - 寄主操作系统接口（对寄生安装的Inferno有效）}{29}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.5}cpu - 执行一个远程的命令}{30}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.6}file2chan - 节点间通讯}{30}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}创新点}{31}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}良好的异构支持}{31}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}实现MapReduce计算模型}{31}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}多节点视为整体的一个节点}{31}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}Inferno在64位平台上的移植}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.5}以外部解释器的形式实现并行计算}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.6}以C语言而非Limbo语言来编写解释器程序}{33}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.7}对file2chan的读写方法封装,实现一个文件完成各种类型通讯}{33}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}概要设计报告}{33}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}总体路线}{33}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}平台模型 - OpenCL的host~\&~device模式}{34}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}异构性}{34}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}抢占式任务分配}{34}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}细并行粒度}{35}}
+\@writefile{toc}{\contentsline {paragraph}{细粒度的并行}{35}}
+\@writefile{toc}{\contentsline {paragraph}{粗粒度的并行}{35}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Raspberry Pi2}{35}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Raspberry Pi2\relax }}{36}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}实践部分}{36}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Inferno在Raspberry Pi移植}{36}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}一个串行程序}{37}}
+\@writefile{lol}{\contentsline {lstlisting}{code/deviceSerial.sh}{37}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}改写的host~\&~device式并行代码}{39}}
+\@writefile{lol}{\contentsline {lstlisting}{code/host.sh}{39}}
+\@writefile{toc}{\contentsline {paragraph}{host部分}{39}}
+\@writefile{lol}{\contentsline {lstlisting}{code/device.sh}{41}}
+\@writefile{toc}{\contentsline {paragraph}{device部分}{41}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}file2chan - sharedPool的基础}{43}}
+\@writefile{lol}{\contentsline {lstlisting}{code/file2chan.b}{43}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}sharedPool - 节点间通讯(任务分配收发池)}{60}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}device部分代码}{60}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}host部分代码}{60}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}节点间通讯同步}{61}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}实测 - Rasberry Pi与Macbook并行执行}{61}}
+\@writefile{lol}{\contentsline {lstlisting}{log/raspberrypi.log}{62}}
+\@writefile{toc}{\contentsline {paragraph}{raspberrypi.log}{62}}
+\@writefile{lol}{\contentsline {lstlisting}{log/macbook.log}{62}}
+\@writefile{toc}{\contentsline {paragraph}{macbook.log}{62}}
+\@writefile{lol}{\contentsline {lstlisting}{log/host.log}{65}}
+\@writefile{toc}{\contentsline {paragraph}{host.log}{65}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.10}Summary}{67}}

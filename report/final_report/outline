@@ -1,0 +1,30 @@
+
+
+编程简单
+    @parallel_begin
+
+    @parallel_end
+
+    openmp : easy
+    cuda : hard
+    openCL : hard
+    MPI : very hard
+
+
+使用简单
+    用法.... very simple 
+    cuda sdk,  config lots 
+    mpi : intel mpi/ openmpi , compiler, config lots, os, hardware
+
+异构 MPI_barrier
+不拖累,不要硬件水平相同
+
+加速比scalability
+线性加速
+
+故障修复
+   能做到和著名计算框架MPI差不多
+   device宕机没事, host当即才挂了
+
+
+

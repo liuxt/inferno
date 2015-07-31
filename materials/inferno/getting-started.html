@@ -1,0 +1,833 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Getting started with Inferno</title>
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+<div class="crumbs">
+	<a href="../">mjl</a> &gt;
+	<a href="./">inferno</a> &gt;
+	<a class="last" href="http://www.ueber.net/who/mjl/inferno/getting-started.html">getting started</a>
+</div>
+
+<h1 id="about_document"><a href="#about_document">About this document</a></h1>
+<p>
+This document intends to help getting started with Inferno.  The topics listed below are covered.  The sections do not depend on each other, so can be read in a different order.
+</p>
+
+<ul class="small">
+	<li><a href="#about_inferno">Ideas</a> behind Inferno</li>
+	<li><a href="#installing">Installing</a> Inferno, from latest sources</li>
+	<li>List of resources for <a href="#reading">reading &amp; learning</a> about Inferno, Styx and Limbo</li>
+	<li>Explanation of <a href="#namespaces">namespaces &amp; styx servers</a></li>
+	<li><a href="#hello_world">"Hello world"</a> in Limbo</li>
+	<li>List of <a href="#quick_links">quick links &amp; search boxes</a></li>
+</ul>
+
+<p>
+Keep in mind this is only an introduction and thus limited in scope.  If something is not described clearly or just plain wrong (even the smallest typo), please let me know at mechiel@ueber.net.
+</p>
+
+<h1 id="about_inferno"><a href="#about_inferno">About Inferno</a></h1>
+<p>
+<a href="http://www.vitanuova.com/inferno/index.html">Inferno</a> is an operating system for distributed systems.  It was created at Bell Labs and <a href="http://www.vitanuova.com/">Vita Nuova</a> now owns the rights to it, and maintains the code.  The source code is available under <a href="http://www.vitanuova.com/inferno/licence.html">a combination of liberal open source licenses</a>.  Inferno shares many ideas (and code!) with <a href="http://plan9.bell-labs.com/plan9/">Plan 9 from Bell Labs</a>.  Some applications have been converted from Plan 9 to run on Inferno.  This is why the Plan 9 and Inferno communities overlap, and why documentation for Plan 9 is often useful to Inferno users as well.
+</p>
+
+<p>
+Many existing resources explain what sets Inferno apart from other operation systems.  Vita Nuova's <a href="http://www.vitanuova.com/inferno/index.html">page on Inferno</a> describes it best. (others: <a href="http://en.wikipedia.org/wiki/Inferno_(operating_system)">wikipedia</a>, <a href="http://doc.cat-v.org/inferno/">cat-v</a>, <a href="http://www.resc.rdg.ac.uk/twiki/bin/view/Resc/InfernoTutorial">resc</a>)  Here is a summary:
+</p>
+<ul class="summary big">
+	<li>It runs on bare hardware, like most other operation systems.  But it can also run as a program on many existing operating systems:  Linux, BSD's, MacOSX, Windows, Plan 9, and other unix variants.  Inferno on bare hardware is called "native Inferno".  Inferno as an application is called "hosted Inferno".  The kernel is written in C.</li>
+	<li>Inferno needs few resources, running on computers with little memory.  It runs on many architectures (such as i386, ARM, MIPS, PowerPC, etc., both hosted and native).</li>
+	<li>Programs are written in the language <a href="http://www.vitanuova.com/inferno/limbo.html">Limbo</a>.  Limbo will look familiar to C programmers.  It is a lean high-level language, providing garbage collection of memory &amp; file descriptors, fast &amp; elegant concurrency (cheap threads, and channels for communication), safety (only safe pointers, array boundary checks).  Limbo source code is compiled to Dis instructions.  It is not possible to write user-space C code (C code can only be linked into the kernel/inferno-as-application).</li>
+	<li>The virtual machine executes dis instructions.  The virtual machine can "compile" dis instructions to machine code (for both native &amp; hosted Inferno, on many architectures), for improved performance.  The virtual machine closely matches Limbo's features, providing reference counted garbage collection, thread creation, communication primitives, etc.  The dis instructions are independent of the architecture and (when hosted) operating system Inferno runs on:  a Limbo program is compiled to one dis program that will work the same on any Inferno.</li>
+	<li>Resources (device drivers, network (local or remote), and almost any other resource you can think of) are accessed through the file system, using the well-known functions open/create/read/write/stat/etc.  Ioctl is notably absent: "special" operations are done by writing utf-8 text strings to a file offered by the file server (one common name for such a file is "ctl").</li>
+	<li>Processes can change their view of the file system (change their "namespace"):  they can mount (and unmount) file servers (all talking the Styx protocol) on any place in the file system hierarchy;  or bind one path over/before/after another path.  Unlike in unix, this is not a privileged operation:  any process (of any user) can change its namespace.  Processes can share their namespace with their parent process, fork their parents namespace, or create a new namespace from scratch.</li>
+	<li>The on-the-wire format of the open/read/write/stat/etc operations is styx.  Styx is the same protocol as Plan 9's 9P2000 (only the name is different;  okay... the authentication mechanism too).  Nevertheless, Plan 9 &amp; Inferno can export and mount each others file servers.  Thus, styx allows you to export and import resources from other system (positively making Inferno a distributed operating system).</li>
+	<li>Development can be done inside Inferno or on an operating system on which Inferno runs:  there are two versions of the development tools, one in portable C (for outside Inferno) and one in Limbo (for inside Inferno).  Inferno itself has versions of the standard unix tools (e.g. sed, grep etc.).  It also comes with Acme, the editor from Plan 9.  This allows you to get started quickly with your known tools (on your operation system of choice), and perhaps later use more of the Inferno development infrastructure.</li>
+</ul>
+
+
+<h1 id="installing"><a href="#installing">Installing</a></h1>
+
+<h2>Hosted Inferno</h2>
+<p>
+In this section we'll compile hosted Inferno, i.e. Inferno that runs on top of your operating system.
+</p>
+
+<h2>Fetching Inferno</h2>
+<p>
+Vita Nuova publishes the latest sources of Inferno in a google code Mercurial repository, <a href="http://code.google.com/p/inferno-os/">inferno-os</a>.  It contains all of Inferno <em>except some of the fonts</em> (due to license restrictions).  Snapshots of the repository are available from the inferno-os google code download page, and from <a href="http://www.vitanuova.com/inferno/downloads.html">Vita Nuova's download page</a>.  The snapshot from the Vita Nuova page is highly recommended since it does include all the fonts.  Download the <i>"snapshot of the complete source tree [...] including the non-free fonts"</i>.  This is the easiest and recommended way to install Inferno.<p>
+
+<p>The snapshot contains the directory <tt class="path">inferno-os</tt>.  Once exctracted, you can fetch updates using <a href="http://mercurial.selenic.com/">Mercurial</a> by running (from the inferno directory): <tt class="cmd">hg pull</tt> and then <tt class="cmd">hg update</tt>.
+</p>
+
+<p>
+The snapshot contains <tt>emu</tt> binaries (the name of the program for hosted Inferno) for some platforms.  This is especially useful on Windows machines that don't have a C compiler.
+</p>
+
+<h2>File tree</h2>
+<p>
+Before compiling Inferno, we'll take a quick look at the layout of the files &amp; directories in <tt class="path">inferno-os</tt>.  This should give you a better understanding of the system and desired result of the compilation.  That in turn will help solve problems you might encounter.  If you are in a hurry, skip to the <a href="#compiling">compiling section</a> right away (and come back here while compiling).
+</p>
+
+<p>
+Note that the inferno directory serves a dual purpose:
+</p>
+<ol>
+	<li>It contains all source files and binaries.  C code &amp; binaries for building hosted Inferno as application on your OS.  Limbo source code &amp; dis files for a running Inferno.</li>
+	<li>It is the root of the file system for a running Inferno instance</li>
+</ol>
+
+<h3>binaries, for hosted/native</h3>
+<pre>
+$SYSHOST/$OBJTYPE/bin/emu
+                        Emu is the Inferno-as-application binary
+                        you will be executing.  The goal of compiling
+                        Inferno is to create this file.  SYSHOST is
+                        e.g.: Linux, Nt, Plan 9, OpenBSD, FreeBSD
+                        (or one of the other values).  OBJTYPE is the
+                        architecture your SYSHOST is running under,
+                        e.g. 386 for Intel 386, or arm for ARM,
+                        etc.
+$SYSHOST/$OBJTYPE/
+              bin/*
+              lib/*
+              include/*
+                        include/* holds the SYSHOST-specific includes
+                        for compiling emu.  bin/* and lib/* contain
+                        compiled binaries and libraries.
+</pre>
+
+<h3>c source, for hosted/native</h3>
+<pre>
+mkfiles/*
+                        These mkfiles specify the tools (compilers,
+                        linkers) and flags used for compiling.
+                        Each SYSHOST and OBJTYPE have their own files.
+                        You don't have to do anything with these.
+utils/*
+                        C programs used when building emu.  utils/mk/
+                        is needed first, to get the compilation
+                        going.  Another tool that will be build is util/iyacc/
+                        ("i" in iyacc is for Inferno, to prevent
+                        name clash with the yacc on your system).
+
+lib*/
+                        The lib*/ directories contain C library
+                        code that is used in (linked into) emu.
+include/*.h
+                        Common header files for C code.  Such as
+                        the lib*/ code, and emu/* and os/* code too
+                        (described below).
+emu/$SYSHOST/*
+                        C code for emu specific to the SYSHOST.  This
+                        typically contains only little C code, and a
+                        tiny amount of assembler.
+emu/port/*
+                        C code for emu common to all OS'es.
+
+os/*
+                        os/* contains all the C code for native
+                        Inferno (running on bare hardware).  For
+                        brevity, it isn't described here in detail.
+                        The layout should be obvious though.
+
+limbo/
+                        The C version of the limbo compiler.  The
+                        Limbo version is in appl/cmd/limbo/ (described
+                        below).  This is compiled first and then
+                        used during compilation.
+</pre>
+
+<h3>compilation configuration file</h3>
+<pre>
+mkconfig
+                        This configuration file is included by all
+                        mkfiles used when working with Inferno.  It
+                        contains variables for the SYSHOST, OBJTYPE,
+                        and the full path of the inferno directory.
+                        This has to be configured correctly!
+</pre>
+
+<h3>limbo code</h3>
+<pre>
+appl/cmd/*
+                        The limbo source for most limbo programs
+                        in the system.  Some programs (such as
+                        the limbo compiler in limbo/) have their own
+                        subdirectory.  The resulting programs are
+                        installed in /dis/ (described below).
+appl/lib/*
+                        Limbo source too, but used as libraries.  The
+                        split between appl/cmd/ and appl/lib/ is
+                        just organisatory.  There is no difference
+                        in the type/style of limbo code, or compilation
+                        process.
+appl/wm/*
+                        Limbo source for the graphical (wm) programs.
+                        Again, just split for cleaner directory
+                        trees.
+appl/*
+                        Some programs or "subsystems" have their
+                        own directories.  Once more, they just contain
+                        the same type of limbo code as the other
+                        directories.
+
+module/*
+                        Contains limbo .m files, the equivalent of
+                        C's .h files.  Only limbo libraries need a
+                        separate module interface description.
+                        Thus, there is usually a direct mapping
+                        between files in module/ and files in
+                        appl/lib/.
+</pre>
+
+<h3>dis executables</h3>
+<pre>
+dis/*.dis
+dis/lib/*.dis
+dis/wm/*.dis
+                        The source compiled in the appl/* directories
+                        are installed to /dis.  The shell will look
+                        here when it is asked to execute a program.
+                        It's just like /bin (and the various other
+                        bin directories) on unix.
+</pre>
+
+<h3>remainder of root file system for hosted/native</h3>
+<pre>
+mnt/
+                        The default mount point for local programs,
+                        like factotum on /mnt/factotum.
+n/
+                        The default mount point for (remote) services.
+                        A special program is often run here that
+                        synthesizes directories on demand, when you
+                        chdir to them.  That is why this directory
+                        is empty.
+dev/
+net/
+env/
+                        Place holder for binding kernel devices.
+                        Some kernel devices are bound by emu's
+                        initialization code.  /net will hold the kernel
+                        network stack, /env the environment variables,
+                        and /dev most other kernel devices.
+lib/*
+                        Database files, such as dictionaries.
+lib/ndb/*
+                        Network configuration files.
+
+fonts/*
+                        Fonts, used by the graphical programs.
+icons/*
+                        Icons, used by graphical programs.
+services/*
+                        Mostly log files, generated by services (such as httpd).
+locale/*
+                        Mostly time zone files.  The file locale/timezone
+                        is used by Inferno.  Copy the appropriate
+                        time zone file to locale/timezone to configure
+                        the time zone.
+</pre>
+
+
+<h3>documentation</h3>
+<pre>
+doc/
+                        Documentation, original source and pdf &amp;
+                        postscript versions.  These are the same
+                        as published on Vita Nuova's web site.
+man/$SECTION/*
+                        Manual pages.  They are very good, definitely
+                        worth reading.
+</pre>
+
+<h3>other files &amp; directories</h3>
+<pre>
+usr/inferno/
+                        The home directory of user (usr) "inferno".
+tools/
+                        Some external/additional C code that might
+                        be used with Inferno.  Not really interesting
+                        for now.
+</pre>
+
+
+<h2 id="compiling"><a href="#compiling">Compiling</a></h2>
+<p>
+Unless you are using pre-compiled binaries, you are now ready to compile hosted Inferno for your operating system.  
+</p>
+<ol class="big">
+	<li>Edit <tt>mkconfig</tt>, set <tt class="var">ROOT</tt> correctly (e.g. to <tt class="val">$HOME/inferno</tt>), <tt class="var">SYSHOST</tt> (e.g. <tt class="val">Linux</tt>), <tt class="var">OBJTYPE</tt> (e.g. <tt class="val">386</tt> for intel machines).  Don't forget to remove/comment the line containing <tt>OBJTYPE=$objtype</tt>.</li>
+	<li>Prepend the full path to <tt class="val">$SYSHOST/$OBJTYPE/bin</tt> to your <tt class="var">$PATH</tt>, so binaries compiled during the build can be found.  E.g. for Linux/386: <tt class="cmd">PATH=$HOME/inferno/Linux/386/bin:$PATH</tt></li>
+	<li>Compile Inferno:  <tt class="cmd">./makemk.sh &amp;&amp; mk -s nuke mkdirs install</tt>.
+		<ul class="small">
+			<li><tt>./makemk.sh</tt> compiles <tt>mk</tt>, used for building all other code</li>
+			<li><tt>nuke</tt> cleans up the tree (especially from libraries just compiled for mk)</li>
+			<li><tt>mkdirs</tt> creates empty directories (which Mercurial is unable to create)</li>
+			<li><tt>install</tt> compiles all source code and installs it (within the Inferno directory).  If all is well, you'll end up with an emu binary (in $ROOT/$SYSHOST/$OBJTYPE/bin), and freshly compiled .dis files.</li>
+		</ul>
+	</li>
+</ol>
+
+<h2>Starting</h2>
+<p>
+To start hosted Inferno, execute <a href="http://www.vitanuova.com/inferno/man/1/emu.html">emu</a>.  You'll have to provide it
+with the location of the root file system.  Either on the command-line
+or through an environment variable.  Additionally, the flags -c0
+and -c1 are often used (to disable/enable the just-in-time compiler for dis programs).
+Emu also accepts arguments:  a program to start instead of the
+default shell.  Wm/wm executes the file <tt>$home/lib/wmsetup</tt> when
+starting.  For example:
+</p>
+
+<pre>
+# from unix shell, start emu (Inferno)
+$SYSHOST/$OBJTYPE/bin/emu -r$HOME/inferno -c0 -g1024x768
+
+# (wait for inferno shell, with semicolon as prompt)
+
+# from inferno shell, start the window manager
+wm/wm
+</pre>
+
+<p>
+The mechanisms described above can be used to make it easier to
+start Inferno:
+</p>
+
+<dl>
+<dt>.profile of a unix shell</dt>
+<dd>
+<p>
+$EMU is used by emu to find additional command-line arguments.  Add this to your .profile:
+</p>
+<pre>
+EMU="-r$HOME/inferno -c0 -g1024x768"
+</pre>
+</dd>
+
+<dt>"infwm"</dt>
+<dd>
+<p>
+Create the shell script <tt>infwm</tt> (or a file name of your choice) somewhere in your PATH, with the contents below.
+Emu will use the EMU environment variable set in the <tt>.profile</tt>.
+It binds the SYSHOST directory <tt>/home</tt>
+on Inferno's <tt>/usr</tt>, then launches the window manager <tt>wm/wm</tt> with automatic login
+as the user you started emu as.  This makes all user
+directories from the host operating system available on <tt>/usr</tt>, and your home directory on <tt>/usr/$USER</tt>.
+Wm/logon sets $home and a few other variables.
+</p>
+
+<pre>
+#!/bin/sh
+exec emu $* /dis/sh.dis -c "bind '#U*/home' /usr; wm/wm wm/logon -u $USER"
+</pre>
+</dd>
+
+<dt>$HOME/lib/wmsetup</dt>
+<dd>
+<p>
+When wm/wm starts, it executes commands in <tt>$HOME/lib/wmsetup</tt>.  Put the following lines in that file to start network services and factotum (the authentication agent):
+</p>
+
+<pre>
+ndb/cs
+auth/factotum
+auth/feedkey
+</pre>
+</dd>
+</dl>
+
+
+<h2>Running programs</h2>
+<p>
+You are now ready to try out some programs that come with Inferno.  Some will be familiar, others will require more effort to understand.
+The recommended way to run programs is from the window manager, <a href="http://www.vitanuova.com/inferno/man/1/wm.html">wm/wm</a>.  At startup it loads a start menu from which (graphical Tk) programs can be started.  <a href="http://www.vitanuova.com/inferno/man/1/wm-sh.html">Wm/sh</a> ("Shell" in the menu) is a window in which a shell is run (a bit like an xterm but simpler), <a href="http://www.vitanuova.com/inferno/man/1/man.html">wm/man</a> is the manual page viewer.  Try editing files with <a href="http://www.vitanuova.com/inferno/man/1/acme.html">acme</a>, start the browser <a href="http://www.vitanuova.com/inferno/man/1/charon.html">charon</a> (and no, unfortunately it doesn't support css, nor many other modern browser features), and start some other programs from the start menu or shell.
+</p>
+
+<p>
+If you know the standard unix tools, you'll quickly find your way.  These programs work mostly the same, only flags &amp; features are sometimes different, or absent:
+<a href="http://www.vitanuova.com/inferno/man/1/ar.html">ar</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/basename.html">basename</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/cal.html">cal</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/cat.html">cat</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/cd.html">cd</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/chgrp.html">chgrp</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/chmod.html">chmod</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/cmp.html">cmp</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/cp.html">cp</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/date.html">date</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/dd.html">dd</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/diff.html">diff</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/du.html">du</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/echo.html">echo</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/env.html">env</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/fortune.html">fortune</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/fmt.html">fmt</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/freq.html">freq</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/grep.html">grep</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/gzip.html">gzip</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/kill.html">kill</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/ls.html">ls</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/m4.html">m4</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/man.html">man</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/mkdir.html">mkdir</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/mv.html">mv</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/ps.html">ps</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/pwd.html">pwd</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/rm.html">rm</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/sed.html">sed</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/sleep.html">sleep</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/sort.html">sort</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/strings.html">strings</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/tail.html">tail</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/tee.html">tee</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/telnet.html">telnet</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/time.html">time</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/touch.html">touch</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/tr.html">tr</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/uniq.html">uniq</a>,
+<a href="http://www.vitanuova.com/inferno/man/1/wc.html">wc</a>.
+</p>
+
+<p>
+Before describing new commands specific to namespaces &amp; styx server usage, we continue with a section on where to find answers to your questions and where to go for further reading.
+</p>
+
+
+<h1 id="reading"><a href="#reading">Reading</a></h1>
+<p>
+Since Inferno rid itself of most of its (ancient) unix ancestry, many of its concepts and programs will be unfamiliar and require learning.  This includes the programming language Limbo.  Various sources &amp; methods are available to help.  Different people have different ways of learning, so its best to mix and match them to your liking:
+</p>
+
+<dl>
+	<dt>Papers</dt>
+	<dd>
+		Vita Nuova has a <a href="http://www.vitanuova.com/inferno/docs.html">list of papers on Inferno</a>.  The papers range from introductory to very specific for one program.  To get started, the papers under "Getting Started" are recommended, as is "A Descent into Limbo" (for a gentle introduction to Limbo).  "The Limbo Programming Language" is good too, but it is much more detailed, and more a Limbo reference than a tutorial or introduction.  If you want to do all development under Inferno (editing &amp; compiling inside Inferno instead of on host operating system), be sure to read "Program Development under Inferno" (and probably the Plan 9 paper about acme too).  Recall that all papers are on your Inferno installation too, in <tt>/doc/</tt>.
+	</dd>
+
+	<dt>Manual pages</dt>
+	<dd>Inferno's manual pages contain valuable information.  You'll be happily surprised if you come from a Linux system.  Wm/man can be used from inside Inferno.  Vita Nuova also has all <a href="http://www.vitanuova.com/inferno/man/index.html">manual pages online</a>.  That page also describes which topics each section covers.</dd>
+
+	<dt>Source code</dt>
+	<dd>
+	Be sure to read existing limbo code, to learn common idiom.  Many of the programs in <tt>appl/cmd/</tt> on your Inferno installation are relatively short and can be understood with little effort.  If you find yourself in a place without a copy of Inferno, google's <a href="http://code.google.com/p/inferno-os/source/browse/">web front-end to the mercurial inferno-os repository</a> will help you out.  <a href="http://www.google.com/codesearch?as_package=&quot;http%3A%2F%2Finferno-os.googlecode.com%2Fhg&quot;&amp;as_q=test&amp;as_lang=c">Google's codesearch in inferno-os</a> will allow you to quickly search in C or Limbo code.
+	<p>
+	Have a look at <a href="http://www.ohloh.net/tags/limbo">limbo at ohloh</a> and <a href="http://freshmeat.net/tags/limbo">limbo at freshmeat</a> too.
+	</p>
+	</dd>
+
+	<dt>Mailing list</dt>
+	<dd>Vita Nuova maintains a public mailing list, read the <a href="http://www.vitanuova.com/news/newsgroup.html">instructions on how to subscribe</a>.  A <a href="http://dir.gmane.org/gmane.os.inferno.general">searchable archive</a> is available too.  Please be kind and consult it before asking questions.</dd>
+
+	<dt>Irc</dt>
+	<dd>At the time of writing, a few dozen people are present in channel #inferno, on irc network irc.freenode.net.  If you're in for some real-time talk about Inferno, feel encouraged to join.  There are channels about Plan 9 too, e.g. #plan9.</dd>
+
+	<dt>FAQ</dt>
+	<dd>See <a href="http://ftp.bme.hu/OS/inferno/faq.html">this old FAQ</a>.  It was last updated in 2005 but might still answers questions when they pop up.</dd>
+
+	<dt>Books</dt>
+	<dd>A book on Limbo is commonly available in book-selling web shops:  "Inferno Programming with Limbo", by Phillip Stanley-Marbell.  It is a bit dated though, no longer accurate on some Limbo constructs (it describes "old-style" exceptions, and predates polymorphism).  Still serves as a nice introduction, with plenty of examples.  The author has a low-resolution pre-release version online, at the <a href="http://www.gemusehaken.org/ipwl/">books homepage</a>.  Reports of people finding cheap copies of the book on various sites (not amazon) have been heard.</dd>
+
+	<dt>Plan 9 resources</dt>
+	<dd>As mentioned, Inferno has concepts, programs and actual code in common with Plan 9.  Therefor many Plan 9 resources apply in various degress to Inferno as well.  For example the papers on <a href="http://plan9.bell-labs.com/sys/doc/acme/acme.html">acme</a>, the <a href="http://plan9.bell-labs.com/sys/doc/plumb.html">plumber</a>, <a href="http://plan9.bell-labs.com/sys/doc/auth.html">factotum</a>.
+</dl>
+
+
+<h1 id="namespaces"><a href="#namespaces">Namespaces &amp; styx servers</a></h1>
+<p>
+Since namespaces &amp; styx file servers are both new and so powerful, they deserve to be explained in their own section.  First namespaces and the idea of styx servers are described, then examples of styx servers are given.
+</p>
+
+<p>
+This next section introduces the concepts of namespaces.  In case you already know about namespaces (perhaps you're a Plan 9 user), you can safely skip to some examples of Inferno <a href="#styx_servers">styx servers</a>.
+</p>
+
+<h2>Namespaces</h2>
+
+<p>
+A namespace is a collection of mount points and binds, much like mount points on unix systems.  In Inferno, you mount a server speaking the styx protocol over a file descriptor (such as a network connection, or a pipe to a program).  Thus, a mount introduces a new file tree in the namespace.  A bind on the other hand just makes a part of the namespace appear in another place in the namespace, as an alias.
+</p>
+
+<p>
+The namespace actually consists of two parts:  regular paths starting with a <tt>/</tt>, and a "special" set of paths that start with an "#" followed by a single character.  These special paths are kernel devices, file trees served by the kernel, often giving access to hardware such as a disk, or to kernel data structures such as processes.  Only the regular paths of the namespace can be changed by binds and mounts.  This is done by the commands <a href="http://www.vitanuova.com/inferno/man/1/bind.html">bind, mount &amp; unmount</a> (which use system calls of the same name).  <a href="http://www.vitanuova.com/inferno/man/1/ns.html">Ns</a> prints the current namespace.  When executed from the shell, it's the shells namespace that <tt>ns</tt> prints (ns prints its own namespace, which it inherited from the shell).  To illustrate, this is the namespace from a freshly started emu, without window manager:
+</p>
+
+<pre>
+; ns
+bind / /
+bind -ac '#U' /
+bind /dev /dev
+bind -b '#^' /dev
+bind /chan /chan
+bind -b '#^' /chan
+bind -b '#m' /dev
+bind -b '#c' /dev
+bind '#p' /prog
+bind '#d' /fd
+bind /net /net
+bind -a '#I' /net
+bind -a /dev /dev
+bind -a /net /net
+bind /net.alt /net.alt
+bind -a /net.alt /net.alt
+bind -c '#e' /env
+cd /
+;
+</pre>
+
+<p>
+As you can see most lines bind a kernel device on a location in the regular file system.  Such as <tt>#U</tt> (the contents of the Inferno root directory) on <tt>/</tt>, and <tt>#m</tt> (the mouse) on <tt>/dev</tt>, and <tt>#I</tt> (the network stack) on <tt>/net</tt>.  Options <tt>-a</tt> and <tt>-b</tt> make the contents of the first path appear <em>a</em>fter or <em>b</em>efore the original contents of the second path (the second path will then contain the union of the first path and itself).  If option <tt>-c</tt> is given, file creation at the target path will be allowed.  The namespace shown above was set up by the Inferno initialization code, as a way to bootstrap the system and give a reasonable default namespace (e.g. the network stack isn't strictly necessary for a freshly started Inferno, but it is convenient to have in place).
+</p>
+
+<p>
+<a href="http://www.vitanuova.com/inferno/man/1/bind.html">Mount</a> introduces an external file tree into the namespace, just as it does on unix systems.  The file tree is accessed by talking the styx protocol over a file descriptor.  The kernel takes care of the styx-part by translating open/read/write/stat/etc system calls into styx messages (the messages are described in <a href="http://www.vitanuova.com/inferno/man/5/0intro.html">section 5</a> of the manual pages), and the response messages into return values.  The <a href="http://www.vitanuova.com/inferno/man/2/sys-bind.html">mount system call</a> expects a file descriptor to talk styx over.  The mount program has convenient syntax for mounting three types of styx servers:
+</p>
+<ul class="big">
+	<li><tt class="cmd">mount /path/to/styx/file target</tt>, gets file descriptor by opening <tt>/path/to/styx/file</tt> </li>
+	<li><tt class="cmd">mount net!www.example.org!styx target</tt>, gets file descriptor by dialing <tt>net!www.example.org!styx</tt></li>
+	<li><tt class="cmd">mount {program} target</tt>, starts <tt>program</tt> and uses its stdin as file descriptor</li>
+</ul>
+
+<p>
+Note that mount performs Inferno authentication when mounting.  Plan 9 has a different type of authentication, that occurs at a different point in connection set up.  While you are trying out the commands, you can turn off authentication with option <tt class="opt">-A</tt>, this will make it easier to get started.  Do remember to turn on authentication for your services later!
+</p>
+
+
+<h2 id="styx_servers"><a href="#styx_servers">Styx servers</a></h2>
+<p>
+Finally we can test a few styx servers.  Beside the obvious on-disk storage of "physical" files and directories (see <a href="http://www.vitanuova.com/inferno/man/4/kfs.html">kfs</a>), many other resources can be represented as file servers.  The examples below should give an idea of what you can do with styx servers.
+</p>
+
+<h3>styxlisten</h3>
+<p>
+An existing namespace can be exported with <a href="http://www.vitanuova.com/inferno/man/1/listen.html">styxlisten</a>.  Use it as in the following example:
+</p>
+
+<pre>
+styxlisten 'tcp!*!styx' export /
+</pre>
+
+<p>
+This will listen for tcp connections on the port "styx" (which is defined in <tt>/lib/ndb/common</tt> to be 6666).  All connections will be served by a single invocation of <tt>export /</tt> (styxlisten expects the program to serve the styx protocol on its file descriptor 0).  The program "export" simply exports the namespace starting at the parameter it is passed, the root of the file system in this case.  These simple programs (they are just over 300 lines combined!) give a lot of power.  Just as with mount, option <tt class="opt">-A</tt> disables authentication on the connection.
+</p>
+
+
+<h3>mntgen</h3>
+<p>
+<a href="http://www.vitanuova.com/inferno/man/4/mntgen.html">Mntgen</a> is a simple program that makes (fakes actually) a directory when you <tt>cd</tt> to it.  This is used on <tt>/n</tt>, where all kinds of network services are mounted.  Since the services and network machines are numerous, it is impractical to create directories for all those services.  With mntgen, you can have an empty <tt>/n</tt> and still mount services on any subdirectory.  The following examples should illustrate the use of mntgen.  First, a reconnaissance of <tt>/n</tt> without mntgen:
+</p>
+
+<pre>
+% cd /n
+% ls -l
+%
+
+% ls -ld test
+ls: stat test: 'test' file does not exist
+%
+
+% cd test
+cd: test: 'test' file does not exist
+%
+
+% bind '#m' /n/mouse
+bind: /n/mouse: '/n/mouse' does not exist
+% 
+</pre>
+
+<p>
+As you see, <tt>/n</tt> is empty.  Now the same, but with the mntgen:
+</p>
+
+<pre>
+% mount {mntgen} /n
+%
+
+% cd /n/
+%
+
+% ls -ld test
+d-r-xr-xr-x M 2 me me 0 Jan 01  1970 test
+%
+
+% ls -ld another
+d-r-xr-xr-x M 2 me me 0 Jan 01  1970 another
+%
+
+% cd more
+% pwd
+/n/more
+%
+
+% bind '#m' /n/mouse
+% ls -l /n/mouse
+---w--w--w- m 0 mjl mjl 0 Apr 15 20:37 /n/mouse/cursor
+--rw-rw-rw- m 0 mjl mjl 0 Apr 15 20:37 /n/mouse/pointer
+% 
+</pre>
+
+
+<h3>ftpfs</h3>
+<p>
+<a href="http://www.vitanuova.com/inferno/man/4/ftpfs.html">Ftpfs</a> is an ftp client.  It simply presents the files of an ftp server as a file system.  The example should be self-explanatory:
+</p>
+
+<pre>
+% ftpfs -a none@example.org -m /n/ftp ftp.openbsd.org
+220 openbsd.srv.ualberta.ca FTP server ready.
+331 Guest login ok, send your email address as password.
+%
+% cd /n/ftp
+% cd pub/OpenBSD
+% ls -l
+d-rwxr-xr-x M 6 0     0       1024 Sep 28  2008 4.2
+d-rwxr-xr-x M 6 0     0       1024 Sep 28  2008 4.3
+d-rwxr-xr-x M 6 0     0       1024 Sep 04  2008 4.4
+d-rwx------ M 6 0     0        512 Mar 09 17:04 4.5
+d-rwxr-xr-x M 6 318   0        512 Feb 19 23:24 OpenBGPD
+d-rwxr-xr-x M 6 318   0        512 Jan 16 06:05 OpenNTPD
+d-rwxrwxr-x M 6 0     122     4608 Feb 22 17:34 OpenSSH
+--rw-r--r-- M 6 0     121      238 Feb 07  1997 README
+d-rwxr-xr-x M 6 20001 20001 454144 Apr 17 01:03 distfiles
+d-rwxr-xr-x M 6 308   0       2048 Jan 12 04:20 doc
+--rw-r--r-- M 6 0     0       8741 Sep 03  2008 ftplist
+d-rwxr-xr-x M 6 0     100     1024 Apr 07 03:59 patches
+d-rwxr-xr-x M 6 0     122      512 Aug 31  2008 snapshots
+d-rwxr-xr-x M 6 0     100     1024 Apr 07 21:07 songs
+d-rwxr-xr-x M 6 0     121      512 Jun 28  2008 tmp
+d-rwxr-xr-x M 6 0     100      512 Jan 07  2005 tools
+%
+</pre>
+
+<h3>tarfs</h3>
+<p>
+<a href="http://www.vitanuova.com/inferno/man/4/tarfs.html">Tarfs</a> mounts a tar file (read-only).  Tar is a simple file format, but a traditional "file system" with on-disk storage is really just the same type of program, just with a different file format (plus they usually implement writes).
+</p>
+
+<pre>
+% tarfs gps.tar /n/tar
+% cd /n/tar
+% ls -l
+d-rwxrwxr-x M 16 0 0 0 Jul 07  2006 gps
+% cd gps
+% ls -l
+--rw-rw-r-- M 16 0 0   287 Mar 04  2006 dat.h
+--rw-rw-r-- M 16 0 0  4501 Mar 04  2006 gpsevermore.c
+--rw-rw-r-- M 16 0 0 18924 Apr 09  2006 gpsfs.c
+--rw-rw-r-- M 16 0 0   219 Mar 04  2006 mkfile
+--rw-rw-r-- M 16 0 0  2795 Mar 04  2006 util.c
+% wc gpsfs.c
+   1010    2713   18920 gpsfs.c
+% cd
+% unmount /n/tar
+</pre>
+
+<h3>memfs</h3>
+<p>
+<a href="http://www.vitanuova.com/inferno/man/4/memfs.html">Memfs</a> is a file system that stores files in memory.  Ideal for mounting on <tt>/tmp</tt>:
+</p>
+
+<pre>
+% ls -l /tmp/test
+ls: stat /tmp/test: '/tmp/test' does not exist
+%
+
+% mount -bc {memfs -s} /tmp
+%
+
+% echo test &gt;/tmp/test
+% ls -l /tmp/test
+--rw-r--r-- M 20 mjl memfs 5 Apr 17 22:43 /tmp/test
+%
+
+% unmount /tmp
+% ls -l /tmp/test
+ls: stat /tmp/test: '/tmp/test' does not exist
+%
+</pre>
+
+
+<h3>/net, or <tt>#I</tt></h3>
+
+<p>
+The network stack is provided by <tt><a href="http://www.vitanuova.com/inferno/man/3/ip.html">#I</a></tt>.  It has a directory per protocol, e.g. <tt>tcp</tt>.  Since <tt>#I</tt> is mounted on /net by default, the tcp stack is available on <tt>/net/tcp</tt>.  Library functions that deal with network connections (such as dial and announce, for connecting and serving) are implemented with normal open/read/write calls on files in <tt>/net/tcp</tt>.  To show the ease with which <tt>/net/tcp</tt> can be used, consider the following shell script that performs a HTTP request:
+</p>
+
+<pre>
+&lt;&gt;[3]/net/tcp/clone {
+        dir=/net/tcp/^`{cat &lt;[0=3]}
+        echo connect 74.125.77.99!80 &gt;$dir/ctl &amp;&amp;
+        {
+                echo 'GET /search?q=inferno-os&amp;btnI=I''m+Feeling+Lucky HTTP/1.1' &amp;&amp;
+                echo 'connection: close' &amp;&amp;
+                echo 'host: www.google.com' &amp;&amp;
+                echo ''
+        }&gt;$dir/data
+        cat $dir/data
+}
+</pre>
+
+<p>
+And the output:
+</p>
+
+<pre>
+HTTP/1.1 302 Found
+Location: http://www.vitanuova.com/inferno/
+Cache-Control: private
+Content-Type: text/html; charset=UTF-8
+Date: Sat, 18 Apr 2009 19:57:52 GMT
+Server: gws
+Content-Length: 230
+Connection: close
+
+&lt;HTML&gt;&lt;HEAD&gt;&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;TITLE&gt;302 Moved&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;
+&lt;H1&gt;302 Moved&lt;/H1&gt;
+The document has moved
+&lt;A HREF="http://www.vitanuova.com/inferno/"&gt;here&lt;/A&gt;.
+&lt;/BODY&gt;&lt;/HTML&gt;
+</pre>
+
+<p>
+That's the power of a well-designed abstraction, and powerful tools like the Inferno shell.  In a similar fashion, dns requests can be performed using <tt>/net/dns</tt>, and more general network address translation can be done using <tt>/net/cs</tt>.
+</p>
+
+
+<h1 id="hello_world"><a href="#hello_world">Hello world</a></h1>
+<p>
+To give you a taste of Limbo programming, here is an implementation of "hello world", and instructions on how to compile and run it.
+</p>
+
+<h2>helloworld.b</h2>
+<pre>
+# this file implements the module interface "Helloworld"
+implement Helloworld;
+
+
+# include the files sys.m &amp; draw.m (from /module)
+include "sys.m";
+include "draw.m";
+
+
+# "Helloworld" is a module, it has the function ("fn") "init" with two parameters.
+# both parameters are unnamed ("nil") because they are not used.
+Helloworld: module {
+	init:	fn(nil: ref Draw-&gt;Context, nil: list of string);
+};
+
+
+# implementation of the function "init", as described in the
+# module interface "Helloworld" above.  "init" in limbo is like "main" in C.
+init(nil: ref Draw-&gt;Context, nil: list of string)
+{
+	# declare "sys" by assigning it the result of loading the Sys module.
+	sys := load Sys Sys-&gt;PATH;
+
+	# call function "print" from the loaded module "sys"
+	sys-&gt;print("hello world!\n");
+}
+</pre>
+
+<h2>compile &amp; run</h2>
+<pre>
+; limbo -gw helloworld.b
+; ./helloworld
+hello world!
+; 
+</pre>
+
+<h1 id="quick_links"><a href="#quick_links">Quick links</a></h1>
+<div class="quick">
+<form method="get" action="http://www.google.com/search">
+<div class="submit">
+<input type="hidden" name="start" value="0"/>
+<input type="hidden" name="ie" value="utf-8"/>
+<input type="hidden" name="oe" value="utf-8"/>
+<input type="hidden" name="q" value="site:http://www.vitanuova.com/inferno/man"/>
+<input class="text" type="text" name="q" value=""/>
+<input name="btnI" type="submit" value="go man page"/>
+<input type="submit" value="list"/>
+</div>
+</form>
+
+<form method="get" action="http://www.google.com/codesearch">
+<div class="submit">
+<input type="hidden" name="as_package" value="&quot;http://inferno-os.googlecode.com/hg&quot;"/>
+<input class="text" type="text" name="as_q" value=""/>
+<input name="as_lang" value="c" type="hidden"/>
+<input name="btnI" type="submit" value="google codesearch c code"/>
+</div>
+</form>
+
+<form method="get" action="http://www.google.com/codesearch">
+<div class="submit">
+<input type="hidden" name="as_package" value="&quot;http://inferno-os.googlecode.com/hg&quot;"/>
+<input class="text" type="text" name="as_q" value=""/>
+<input name="as_lang" value="limbo" type="hidden"/>
+<input name="btnI" type="submit" value="google codesearch limbo code"/>
+</div>
+</form>
+
+<form method="get" action="http://search.gmane.org/search.php">
+<div class="submit">
+<input type="hidden" name="group" value="gmane.os.inferno.general"/>
+<input class="text" type="text" name="query" value=""/>
+<input type="submit" value="search mailing list archive"/>
+</div>
+</form>
+
+<div class="inferno">
+mail
+<a href="http://news.gmane.org/gmane.os.inferno.general">inferno mail list archive</a>
+</div>
+
+<div class="man">
+man pages
+<a href="http://www.vitanuova.com/inferno/man/index.html">index</a>
+<a href="http://www.vitanuova.com/inferno/man/2/INDEX.html">section 2 index</a>
+</div>
+
+<div>
+hg
+<a href="http://inferno-os.googlecode.com/hg/CHANGES">CHANGES</a>
+<a href="http://code.google.com/p/inferno-os/source/browse/">browse source</a>
+<a href="http://code.google.com/p/inferno-os/source/list">browse changes</a>
+<a href="http://code.google.com/p/inferno-os/issues/list">issues</a>
+</div>
+
+<div>
+misc
+<a href="http://caerwyn.com/ipn/">inferno programmers notebook</a>
+</div>
+
+<div>
+papers
+<a href="http://www.vitanuova.com/inferno/papers/limbo.html">limbo programming language</a>
+<a href="http://www.vitanuova.com/inferno/docs.html">all papers</a>
+</div>
+</div>
+
+<h1 id="history"><a href="#history">History</a></h1>
+<p>
+A list of updates to this document:
+</p>
+<dl>
+<dt>2010-12-21</dt>
+<dd>Small improvements, remove broken links.</dd>
+<dt>2010-01-30</dt>
+<dd>Small improvements, mention lib/emptydirs, fix links to mercurial files in inferno-os repository.</dd>
+<dt>2009-07-15</dt>
+<dd>Updated section on fetching Inferno.  Subversion has been replaced by Mercurial.</dd>
+</dl>
+<p>
+This document is in the public domain.
+</p>
+
+	</body>
+</html>

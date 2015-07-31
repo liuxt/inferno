@@ -1,0 +1,192 @@
+\relax 
+\@writefile{toc}{}
+\providecommand \oddpage@label [2]{}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}调研报告}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}项目背景及实践意义}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.1}项目的背景}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.2}分布式操作系统}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.1}{\ignorespaces 分布式操作系统的架构\relax }}{6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.3}分布式计算}{6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.4}分布式系统实现并行计算的主要问题}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.5}Inferno操作系统}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.2}{\ignorespaces Inferno的架构\relax }}{8}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}小组成员相关背景}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}立项依据}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.1}项目意义}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.3.2}理论依据}{10}}
+\@writefile{toc}{\contentsline {paragraph}{资源即文件}{10}}
+\@writefile{toc}{\contentsline {paragraph}{命名空间}{11}}
+\@writefile{toc}{\contentsline {paragraph}{使用标准通信协议来访问资源}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}目前所调研到的相关工作}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.1}Inferno相关调研}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.4.2}常见并行框架概况}{12}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.3}{\ignorespaces OpenMP原理\relax }}{13}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.1}{\ignorespaces 各种并行计算框架对比\relax }}{14}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}OpenCL调研}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.1}简介}{14}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.2}主机设备交互}{15}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.5.3}OpenCL架构}{15}}
+\@writefile{toc}{\contentsline {paragraph}{平台模型}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.4}{\ignorespaces OpenCL的平台模型--host~\&~device模型\relax }}{16}}
+\@writefile{toc}{\contentsline {paragraph}{执行模型}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.5}{\ignorespaces OpenCL's kernel\relax }}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.6}{\ignorespaces OpenCL的内存模型\relax }}{18}}
+\@writefile{toc}{\contentsline {paragraph}{内存模型}{19}}
+\@writefile{toc}{\contentsline {paragraph}{编程模型}{19}}
+\@writefile{toc}{\contentsline {paragraph}{OpenCL软件框架}{19}}
+\@writefile{toc}{\contentsline {paragraph}{OpenCL实现原理}{20}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.6}MPI调研}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.1}MPI数据类型}{20}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.2}通信域}{21}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.3}MPI调用接口}{21}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.6.4}MPI并行编程模式}{22}}
+\@writefile{toc}{\contentsline {paragraph}{主从模式}{23}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.7}{\ignorespaces MPI主从模式\relax }}{23}}
+\@writefile{toc}{\contentsline {paragraph}{对等模式}{24}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.8}{\ignorespaces MPI对等模式\relax }}{24}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}想法来源及可能遇到的挑战}{24}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}可行性研究报告}{25}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}理论依据与技术依据}{25}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.1}Sytx协议及其具体实现}{25}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.2}ns - 显示当前命名空间}{28}}
+\@writefile{lol}{\contentsline {lstlisting}{result/ns}{28}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.3}bind, mount, unmount - 修改命名空间}{29}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.4}os - 寄主操作系统接口（对寄生安装的Inferno有效）}{30}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.5}cpu - 执行一个远程的命令}{31}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.6}file2chan - 节点间通讯}{31}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}创新点}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}良好的异构支持}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}实现MapReduce计算模型}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}多节点视为整体的一个节点}{32}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}Inferno在64位平台上的移植}{33}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.5}以外部解释器的形式实现并行计算}{33}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.6}以C语言而非Limbo语言来编写解释器程序}{34}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.7}对file2chan的读写方法封装,实现一个文件完成各种类型通讯}{34}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}概要设计报告}{34}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}总体路线}{34}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}平台模型 - OpenCL的host~\&~device模式}{35}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}异构性}{35}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}抢占式任务分配}{35}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}细并行粒度}{36}}
+\@writefile{toc}{\contentsline {paragraph}{细粒度的并行}{36}}
+\@writefile{toc}{\contentsline {paragraph}{粗粒度的并行}{36}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Raspberry Pi2}{36}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Raspberry Pi2\relax }}{37}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}理论研究与实践}{37}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Inferno在Raspberry Pi移植}{37}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}初步尝试 --- 一个串行程序}{38}}
+\@writefile{lol}{\contentsline {lstlisting}{code/deviceSerial.sh}{38}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}初步尝试 -- 改写的host~\&~device式并行代码}{40}}
+\@writefile{lol}{\contentsline {lstlisting}{code/host.sh}{40}}
+\@writefile{toc}{\contentsline {paragraph}{host部分}{40}}
+\@writefile{lol}{\contentsline {lstlisting}{code/device.sh}{42}}
+\@writefile{toc}{\contentsline {paragraph}{device部分}{42}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}file2chan - sharedPool的基础}{44}}
+\@writefile{lol}{\contentsline {lstlisting}{code/file2chan.b}{44}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}sharedPool - 节点间通讯(任务分配收发池)}{61}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}device部分代码}{61}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}host部分代码}{61}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}并行框架开放的三个函数}{62}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.1}map}{62}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces map函数示意图\relax }}{62}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.2}reduce}{63}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces reduce函数的示意图\relax }}{64}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces merge函数的示意图\relax }}{65}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.8.3}merge}{65}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}函数并行化原理与容错机制}{66}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.1}map}{66}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.2}reduce}{67}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.9.3}merge}{68}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.10}并行化执行流程图}{68}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces 总体执行流程图\relax }}{69}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces map执行流程图\relax }}{70}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces reduce执行流程图\relax }}{71}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.7}{\ignorespaces merge执行流程图\relax }}{72}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.11}解释器的总体架构}{73}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.8}{\ignorespaces 解释器的总体架构图\relax }}{73}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}并行计算框架的安装与用法}{74}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}安装方法}{74}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}配置device\_ip}{74}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}user.sh的编写}{74}}
+\@writefile{lol}{\contentsline {lstlisting}{code/user.sh}{74}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}执行一个并行化程序}{77}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces 解释器解释user.sh生成device和host代码\relax }}{77}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces 执行host.sh进行计算\relax }}{77}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}成果与不足}{78}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}向官方提交了2个bug与1个patch}{78}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}arm架构下的编译bug}{78}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces arm架构下的编译bug\relax }}{78}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}arm架构下的网络接口bug}{78}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.3}有关x86编译问题的patch}{78}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces arm架构下的网络接口bug\relax }}{79}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces 有关x86编译问题的patch\relax }}{79}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}日志功能方便调试}{80}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.4}{\ignorespaces host的日志\relax }}{80}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.5}{\ignorespaces device的日志\relax }}{81}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}故障修复}{82}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.6}{\ignorespaces macbook节点取编号为7的数据时出现故障\relax }}{82}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.7}{\ignorespaces yangzhi节点取编号为11的数据时出现故障\relax }}{82}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}跨平台性}{82}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.8}{\ignorespaces Linux节点在完成自身任务后重新计算因故障未被计算的数据\relax }}{83}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}高度可扩展性与可配置性}{83}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.9}{\ignorespaces 解释器的总体架构图\relax }}{84}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}benchmark}{84}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.6.1}各个设备的配置}{84}}
+\@writefile{toc}{\contentsline {paragraph}{树莓派}{84}}
+\@writefile{toc}{\contentsline {paragraph}{刘旭彤的设备}{84}}
+\@writefile{toc}{\contentsline {paragraph}{阮震元的设备}{84}}
+\@writefile{toc}{\contentsline {paragraph}{解宇飞的设备}{85}}
+\@writefile{toc}{\contentsline {paragraph}{杨智的设备}{85}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.6.2}benchmark内容}{85}}
+\@writefile{toc}{\contentsline {paragraph}{串行版本的benchmark}{86}}
+\@writefile{lol}{\contentsline {lstlisting}{serial.sh}{86}}
+\@writefile{toc}{\contentsline {paragraph}{并行版本的benchmark}{87}}
+\@writefile{lol}{\contentsline {lstlisting}{parallel.sh}{87}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.6.3}性能基准测试结果}{89}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.10}{\ignorespaces 五台设备性能基准测试结果\relax }}{90}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.6.4}使用并行计算框架进行并行benchmark测试}{90}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.11}{\ignorespaces 使用并行计算框架进行并行benchmark测试\relax }}{91}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}与其他并行计算框架的对比}{91}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.7.1}异构性}{91}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.12}{\ignorespaces 实测所得加速比与理论计算所得加速比(较单节点树莓派)\relax }}{92}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.7.2}部署简单}{92}}
+\@writefile{toc}{\contentsline {paragraph}{我们的并行计算框架}{92}}
+\@writefile{toc}{\contentsline {paragraph}{CUDA}{93}}
+\@writefile{toc}{\contentsline {paragraph}{MPI}{93}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.7.3}编程简单}{93}}
+\@writefile{toc}{\contentsline {paragraph}{我们的并行计算框架}{93}}
+\@writefile{toc}{\contentsline {paragraph}{OpenMP}{93}}
+\@writefile{toc}{\contentsline {paragraph}{CUDA}{94}}
+\@writefile{toc}{\contentsline {paragraph}{OpenCL}{95}}
+\@writefile{toc}{\contentsline {paragraph}{MPI}{99}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.7.4}支持故障恢复}{102}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces summary\relax }}{103}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.8}不足点}{103}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.9}完成过程中遇到的困难}{104}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}致谢}{104}}
+\bibcite{1}{1}
+\bibcite{1}{2}
+\bibcite{1}{3}
+\bibcite{1}{4}
+\bibcite{1}{5}
+\bibcite{1}{6}
+\bibcite{1}{7}
+\bibcite{1}{8}
+\bibcite{1}{9}
+\bibcite{2}{10}
+\bibcite{2}{11}
+\bibcite{1}{12}
+\bibcite{1}{13}
+\bibcite{1}{14}
+\bibcite{1}{15}
+\bibcite{1}{16}
+\bibcite{3}{17}
+\bibcite{4}{18}
+\bibcite{5}{19}
+\bibcite{6}{20}
+\bibcite{7}{21}
+\bibcite{8}{22}

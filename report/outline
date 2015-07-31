@@ -1,0 +1,31 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+4.6 three functions, map, reduce, merge. Introduce their usage.
+4.7 how to paralize map
+4.8 how to paralize reduce 
+4.9 how to paralize merge
+4.10 故障修复--- map
+4.11 故障修复--- reduce
+4.12 故障修复--- merge
+4.13 interpreter总体架构
+    .h
+    .cpp
+    .template
+
+
+5. usage & install
+5.1 install (automake & autoconf)
+5.2 device_ip 
+5.3 how to parallel script(user.sh)
+5.4 launch parallel program
+
+6.优点 & 不足
+6.1 parallel ratio
+6.2 故障修复
+6.3 跨平台型(rasp)
+6.4 compare with other parallel framework
+6.5 不足点,可以改进的地方
+
+Give thanks to kxing. 

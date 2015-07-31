@@ -1,0 +1,545 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>OpenCL:一种异构计算架构 - Let it be! - 博客园</title>
+<link type="text/css" rel="stylesheet" href="/bundles/blog-common.css?v=RFWbSMVn474Meo5c6rKa1DH_M4ldFPuI9Jah-EA-L5Q1"/>
+<link type="text/css" rel="stylesheet" href="/blog/customcss/97272.css?v=9cxUxVII7pI%2fNzfX%2fnebumujL14%3d"/>
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/wangshide/rss"/>
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/wangshide/rsd.xml"/>
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/wangshide/wlwmanifest.xml"/>
+<script src="http://common.cnblogs.com/script/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'wangshide', cb_enable_mathjax=true;</script>
+<script src="/bundles/blog-common.js?v=NRIlPIHMlVEgoqJZIuk9OQtjtZjNFcz_ov8kYhFFdoM1" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+<div id="page_begin_html"></div><script>load_page_begin_html();</script>
+
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+		
+<!--done-->
+<div class="title"><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/wangshide/">Let it be!</a></div>
+<div class="subtitle"></div>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li id="nav_sitehome"></li>
+<li id="nav_myhome"></li>
+<li id="nav_q"><a class="menu" href="http://q.cnblogs.com/">博问</a></li>
+<li id="nav_ing"><a class="menu" href="http://home.cnblogs.com/ing/">闪存</a></li>
+<li id="nav_newpost"></li>
+<li id="nav_contact"></li>
+<li id="nav_rss">
+<!----></li>
+<li id="nav_admin"><a id="MyLinks1_Admin" class="menu" rel="nofollow" href="http://i.cnblogs.com/">管理</a></li>
+</ul>
+
+		<div class="blogStats">
+			
+			
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+
+<!--done-->
+<div id="topics">
+	<div class = "post">
+		<h1 class = "postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/wangshide/archive/2012/01/07/2315830.html">OpenCL:一种异构计算架构</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body"><!--?xml version="1.0" encoding="gbk"?-->
+<style><!--
+/*--><![CDATA[/*><!--*/
+
+  html { font-family: times, serif; font-size: 12pt; }
+
+  .title  { text-align: center; }
+
+  .todo   { color: red; }
+
+  .done   { color: green; }
+
+  .tag    { background-color: #add8e6; font-weight:normal }
+
+  .target { }
+
+  .timestamp { color: #bebebe; }
+
+  .timestamp-kwd { color: #5f9ea0; }
+
+  p.verse { margin-left: 3% }
+
+  pre {
+
+	border: 1pt solid #aebdcc;
+
+	background-color: #f3f5f7;
+
+	padding: 5pt;
+
+	font-family: courier, monospace;
+
+        font-size: 90%;
+
+        overflow:auto;
+
+  }
+
+  table { border-collapse: collapse; }
+
+  td, th { vertical-align: top; }
+
+  dt { font-weight: bold; }
+
+  div.figure { padding: 0.5em; }
+
+  div.figure p { text-align: center; }
+
+  textarea { overflow-x: auto; }
+
+  .linenr { font-size:smaller }
+
+  .code-highlighted {background-color:#ffff00;}
+
+  .org-info-js_info-navigation { border-style:none; }
+
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+
+                               white-space:nowrap; }
+
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+
+                                 font-weight:bold; }
+--></style>
+<script type="text/javascript">// <![CDATA[
+/*--><![CDATA[/*><!--*/
+
+ function CodeHighlightOn(elem, id)
+
+ {
+
+   var target = document.getElementById(id);
+
+   if(null != target) {
+
+     elem.cacheClassElem = elem.className;
+
+     elem.cacheClassTarget = target.className;
+
+     target.className = "code-highlighted";
+
+     elem.className   = "code-highlighted";
+
+   }
+
+ }
+
+ function CodeHighlightOff(elem, id)
+
+ {
+
+   var target = document.getElementById(id);
+
+   if(elem.cacheClassElem)
+
+     elem.className = elem.cacheClassElem;
+
+   if(elem.cacheClassTarget)
+
+     target.className = elem.cacheClassTarget;
+
+ }
+
+/*]]>*/
+// ]]></script>
+<div id="content">
+<h1 class="title"><strong>OpenCL:一种异构计算架构</strong></h1>
+<div id="table-of-contents">
+<h1>目录</h1>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 摘要 </a></li>
+<li><a href="#sec-2">2 为什么需要OpenCL？ </a></li>
+<li><a href="#sec-3">3 OpenCL架构 </a>
+<ul>
+<li><a href="#sec-3.1">3.1 介绍 </a></li>
+<li><a href="#sec-3.2">3.2 平台模型 </a></li>
+<li><a href="#sec-3.3">3.3 执行模型 </a>
+<ul>
+<li><a href="#sec-3.3.1">3.3.1 内核 </a></li>
+<li><a href="#sec-3.3.2">3.3.2 上下文 </a></li>
+<li><a href="#sec-3.3.3">3.3.3 命令队列 </a></li>
+</ul>
+</li>
+<li><a href="#sec-3.4">3.4 内存模型 </a></li>
+<li><a href="#sec-3.5">3.5 编程模型 </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 基于OpenCL的编程示例 </a>
+<ul>
+<li><a href="#sec-4.1">4.1 流程 </a></li>
+<li><a href="#sec-4.2">4.2 图像旋转 </a>
+<ul>
+<li><a href="#sec-4.2.1">4.2.1 图像旋转原理 </a></li>
+</ul>
+</li>
+<li><a href="#sec-4.3">4.3 实现流程 </a></li>
+<li><a href="#sec-4.4">4.4 图像旋转 </a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 总结 </a></li>
+<li><a href="#sec-6">6 参考文献 </a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-1" class="outline-2">
+<h1 id="sec-1"><span class="section-number-2">1</span> 摘要</h1>
+<div id="text-1" class="outline-text-2">
+<p>由于晶体管功耗、物理性能的限制，CPU的发展受到了很大约束。 人们转而寻找其它方式来提高系统性能，如多核处理器，异构平台等。 开放式计算语言（OpenCL）的出现为当前大量存在的异构系统的并行计算提供了一个 标准。OpenCL通过一系列API的定义，提供硬件独立的编程语言，为程序员提供 了灵活而又高效的编程环境。 本文通过对OpenCL计算架构的深入讨论，指出了OpenCL编程的优势及不足。并进行了 相关编程实践，通过对不同设备的并行编程测试，表明如果采用OpenCL并行编程架构， 能显著提高程序的运行效率。</p>
+<p>就目前的情况来看，异构系统有很高的性价比。相信在不久的将来，OpenCL将会成为 计算机并行、异构计算的重要组成部分。</p>
+<p>关键字：OpenCL，异构计算，CPU/GPU计算，并行计算</p>
+</div>
+</div>
+<div id="outline-container-2" class="outline-2">
+<h1 id="sec-2"><span class="section-number-2">2</span> 为什么需要OpenCL？</h1>
+<div id="text-2" class="outline-text-2">
+<p>在过去的几十年里，计算机产业发生了巨大的变化。计算机性能 的不断提高为当前各种应用提供了有力的保障。对于计算机的速度 而言，正如摩尔定律描述的那样，是通过晶体管数目增加来提高频率 的方式实现的。但是到了二十一世纪初期以后，这种增长方式受到 了一些限制，晶体管尺寸变得已经很小，其物理特性决定了很难再通 过大规模地增加晶体管的数目来提升频率，且由于功耗也以非线性 的速度增加，因此这种方式受到很大的限制。在未来，这一趋势会继续 成为影响计算机系统最为重要的因素之一。</p>
+<p>为了解决这一问题通常有两种方式，第一种是通过 增加处理器的核心数目来为多任务，多线程等提供支持，从整体 上提升系统的性能。第二种方式是通过异构的方式，例如可 利用CPU（Central Processing Unit）、GPU（Graphic Processing Unit）、甚至APU(Accelerated Processing Units， CPU与GPU的融合)等计算设备的计算能力从而 来既提高系统的速度。</p>
+<p>异构系统越来越普遍，对于支持这种环境的计算而言，也正受到越来越多 的关注。当前，不同厂商通常仅仅提供对于自己设备编程的实现。对于异 构系统一般很难用同种风格的编程语言来实现机构编程，而且将不同的设备 作为统一的计算单元来处理的难度也是非常大的。</p>
+<p>开放式计算语言（Open Computing Language:OpenCL），旨在满足这一重要需求。 通过定义一套机制，来实现硬件独立的软件开发环境。利用OpenCL可以充分利 用设备的并行特性，支持不同级别的并行，并且能有效映射到由CPU，GPU， FPGA（Field－Programmable Gate Array）和将来出现的设备 所组成的同构或异构，单设备或多设备的系统。OpenCL定义了运行时， 允许用来管理资源，将不同类型的硬件结合在同种执行环境中，并且很有希望 在不久的将来，以更加自然的方式支持动态地平衡计算，功耗和其他资源。</p>
+<p>我相信在不久的将来，OpenCL将在异构并行编程中得到广泛的应用。</p>
+</div>
+</div>
+<div id="outline-container-3" class="outline-2">
+<h1 id="sec-3"><span class="section-number-2">3</span> OpenCL架构</h1>
+<div id="text-3" class="outline-text-2">&nbsp;</div>
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1"><span class="section-number-3">3.1</span> 介绍</h3>
+<div id="text-3.1" class="outline-text-3">
+<p>OpenCL为异构平台提供了一个编写程序，尤其是并行程序的开放的框架标准。 OpenCL所支持的异构平台可由多核CPU、GPU或其他类型的处理器组成。 OpenCL由两部分组成，一是用于编写内核程序(在OpenCL设备上运行的代码) 的语 言，二是定义并控制平台的API。OpenCL提供了基于任务和基于数据两种并行计 算机制，它极大地扩展了GPU 的应用范围，使之不再局限于图形领域。</p>
+<p>OpenCL由Khronos Group维护。Khronos Group是一个非盈利性技术组织，维护着 多个开放的工业标准，例如OpenGL和OpenAL。这两个标准分别用于三维图形和计 算机音频方面。</p>
+<p>OpenCL源程序既可以在多核CPU上也可以在GPU上编译执行，这大大提高了代码的 性能和可移植性。OpenCL标准由相应的标准委员会制订，委员会的成员来自业界 各个重要厂商（主要有：AMD，Intel，IBM和NVIDIA）。作为用户和程序员期待 已久的东西，OpenCL带来两个重要变化： 一个跨厂商的非专有软件解决方案；一个跨平台的异构框架以同时发挥系统中 所有计算单元的能力。</p>
+<p>OpenCL支持广泛的应用，将开发应用的过程一般化比较困难， 但是，通常来说，一个基于异构平台的应用主要包含下面的 步骤[ 3 ]：</p>
+<ol>
+<li>找出组成异构平台的所有组件。</li>
+<li>考察组件的特征，这样就能使得软件根据不同的硬件特征来实现。</li>
+<li>创建在平台上运行的一组内核。</li>
+<li>设置与计算相关的存储对象。</li>
+<li>在合适的组件上以正确的顺序执行内核。</li>
+<li>收集结果。</li>
+</ol>
+<p>这些步骤通过在OpenCL内部的一系列API和内核编程环境来实现。 这一实现采用&ldquo;分治&rdquo;策略。 可将问题分解为下面的模型[ 1 ] 平台模型 执行模型 存储模型 编程模型</p>
+<p>这些概念是OpenCL整体架构的核心。 这四个模型将贯穿在整个OpenCL的编程过程中。</p>
+<p>下面就简要介绍这四个模型的相关内容。</p>
+</div>
+</div>
+<div id="outline-container-3.2" class="outline-3">
+<h3 id="sec-3.2"><span class="section-number-3">3.2</span> 平台模型</h3>
+<div id="text-3.2" class="outline-text-3">
+<p>平台模型（如图1）指定有一个处理器（主机Host）来协调程序的执行， 一个或多个处理器（设备Devices）来执行OpenCL C代码。 在这里其实仅仅是一种抽象的硬件模型，这样就能方便程序员 编写OpenCL C函数（称之为内核）并在不同的设备上执行。&nbsp;</p>
+<p><a href="http://images.cnblogs.com/cnblogs_com/wangshide/201201/20120107170210109.jpg"><img style="display: inline;" title="platform" src="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702109204.jpg" alt="platform" width="680" height="325" /></a></p>
+<p>图中的设备可以被看成是CPU/GPU，而设备中的计算单元可以被看成是 CPU/GPU的核，计算单元的所有处理节点作为SIMD单元或SPMD单元（每个 处理节点维护自己的程序计数器）执行单个指令流。 抽象的平台模型更与当前的GPU的架构接近。</p>
+<p>平台可被认为是不同厂商提供的OpenCL API的实现。如果一个平台选定之后一般只能 运行该平台所支持的设备。就当前的情况来看，如果选择了Intel的OpenCL SDK 就只能使用Intel的CPU来进行计算了，如果选择AMD的APP SDK则能进行AMD的CPU和AMD的 GPU来进行计算。一般而言，A公司的平台选定之后不能与B公司的平台进行通信。</p>
+</div>
+</div>
+<div id="outline-container-3.3" class="outline-3">
+<h3 id="sec-3.3"><span class="section-number-3">3.3</span> 执行模型</h3>
+<div id="text-3.3" class="outline-text-3">
+<p>在执行模型中最重要的是内核，上下文和命令队列的概念。上下文管理多个设备， 每个设备有一个命令队列，主机程序将内核程序提交到不同的命令队列上执行。</p>
+</div>
+<div id="outline-container-3.3.1" class="outline-4">
+<h4 id="sec-3.3.1"><span class="section-number-4">3.3.1</span> 内核</h4>
+<div id="text-3.3.1" class="outline-text-4">
+<p>内核是执行模型的核心，能在设备上执行。当一个内核执行之前，需要指定一个 N-维的范围（NDRange）。一个NDRange是一个一维、二维或三维的索引空间。 还需要指定全局工作节点的数目，工作组中节点的数目。如图<a href="#NDRange">NDRange</a>所示， 全局工作节点的范围为{12, 12}，工作组的节点范围为{4, 4}，总共有9个工作组。</p>
+<p>&nbsp;</p>
+<p><a href="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702113074.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="NDRange" src="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702146299.jpg" alt="NDRange" width="591" height="391" border="0" /></a></p>
+<p>例如一个向量相加的内核程序：</p>
+<div>
+<pre>__kernel void VectorAdd(__global int *A, __global int *B, __global int *C){
+    int id = get_global_id(0);
+    C[id]  = A[id] + B[id];
+}</pre>
+</div>
+<br />
+<p>如果定义向量为1024维，特别地，我们可以定义全局工作节点为1024， 工作组中节点为128，则总共有8个组。定义工作组主要是为有些仅需在 组内交换数据的程序提供方便。当然工作节点数目的多少要受到设备的限制。 如果一个设备有1024个处理节点，则1024维的向量，每个节点计算一次就能完成。 而如果一个设备仅有128个处理节点，那么每个节点需要计算8次。合理设置 节点数目，工作组数目能提高程序的并行度。 </p>
+</div>
+</div>
+<div id="outline-container-3.3.2" class="outline-4">
+<h4 id="sec-3.3.2"><span class="section-number-4">3.3.2</span> 上下文 </h4>
+<div id="text-3.3.2" class="outline-text-4">
+<p>一个主机要使得内核运行在设备上，必须要有一个上下文来与设备进行交互。 一个上下文就是一个抽象的容器，管理在设备上的内存对象，跟踪在设备上 创建的程序和内核。 </p>
+</div>
+</div>
+<div id="outline-container-3.3.3" class="outline-4">
+<h4 id="sec-3.3.3"><span class="section-number-4">3.3.3</span> 命令队列 </h4>
+<div id="text-3.3.3" class="outline-text-4">
+<p>主机程序使用命令队列向设备提交命令，一个设备有一个命令队列，且与上下文 相关。命令队列对在设备上执行的命令进行调度。这些命令在主机程序和设备上 异步执行。执行时，命令间的关系有两种模式：(1)顺序执行，(2)乱序执行。 </p>
+<p>内核的执行和提交给一个队列的内存命令会生成事件对象。 这用来控制命令的执行、协调宿主机和设备的运行。 </p>
+</div>
+</div>
+</div>
+<div id="outline-container-3.4" class="outline-3">
+<h3 id="sec-3.4"><span class="section-number-3">3.4</span> 内存模型 </h3>
+<div id="text-3.4" class="outline-text-3">
+<p>一般而言，不同的平台之间有不同的存储系统。例如，CPU有高速缓存而GPU就没有。 为了程序的可移植性，OpenCL定义了抽象的内存模型，程序实现的时候只需关注抽 象的内存模型，具体向硬件上的映射由驱动来完成。内存空间的定义及与硬件的映 射大致如图所示。&nbsp; </p>
+<p><a href="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702153201.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="memory" src="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702159024.jpg" alt="memory" width="522" height="494" border="0" /></a></p>
+<p>内存空间在程序内部可以用关键字的方式指定，不同的定义与数据存在的位置 相关，主要有如下几个基本概念[ 2 ]： </p>
+<ul>
+<li>全局内存：所有工作组中的所有工作项都可以对其进行读写。工作项可以 读写此中内存对象的任意元素。对全局内存的读写可能会被缓存，这取决于设备 的能力。</li>
+<li>不变内存：全局内存中的一块区域，在内核的执行过程中保持不变。 宿主机负责对此中内存对象的分配和初始化。</li>
+<li>局部内存：隶属于一个工作组的内存区域。它可以用来分配一些变量， 这些变量由此工作组中的所有工作项共享。在OpenCL设备上，可能会将 其实现成一块专有的内存区域，也可能将其映射到全局内存中。</li>
+<li>私有内存：隶属于一个工作项的内存区域。 一个工作项的私有内存中所定义的变量对另外一个工作项来说是不可见的。 </li>
+</ul>
+</div>
+</div>
+<div id="outline-container-3.5" class="outline-3">
+<h3 id="sec-3.5"><span class="section-number-3">3.5</span> 编程模型 </h3>
+<div id="text-3.5" class="outline-text-3">
+<p>OpenCL支持数据并行，任务并行编程，同时支持两种模式的混合。对于同步 OpenCL支持同一工作组内工作项的同步和命令队列中处于同一个上下文中的 命令的同步。 </p>
+</div>
+</div>
+</div>
+<div id="outline-container-4" class="outline-2">
+<h1 id="sec-4"><span class="section-number-2">4</span> 基于OpenCL的编程示例 </h1>
+<p>在本小节中以图像旋转的实例，具体介绍OpenCL编程的步骤。 首先给出实现流程，然后给出实现图像旋转的C循环实现和OpenCL C kernel实现。 </p>
+<div id="text-4.1" class="outline-text-3">&nbsp;</div>
+<div id="outline-container-4.2" class="outline-3">
+<h3 id="sec-4.2"><span class="section-number-3">4.1</span> 流程 </h3>
+<p><a href="http://images.cnblogs.com/cnblogs_com/wangshide/201201/2012010717021671.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="flow" src="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702169481.jpg" alt="flow" width="692" height="609" border="0" /></a></p>
+<h3><span class="section-number-3">4.2</span> 图像旋转 </h3>
+<div id="text-4.2" class="outline-text-3">&nbsp;</div>
+<h4 id="sec-4.2.1" class="outline-4"><span class="section-number-4">4.2.1</span> 图像旋转原理 </h4>
+<p class="outline-text-4">图像旋转是指把定义的图像绕某一点以逆时针或顺时针方向旋转一定的角度， 通常是指绕图像的中心以逆时针方向旋转。假设图像的左上角为(l, t), 右下角为(r, b)，则图像上任意点(x, y) 绕其中心(xcenter, ycenter)逆时针旋转&theta;角度后， 新的坐标位置(x',y')的计算公式为： </p>
+<p class="outline-text-4">x&prime; = (x - xcenter) cos&theta; - (y － ycenter) sin&theta; + xcenter,</p>
+<p class="outline-text-4">y&prime; = (x - xcenter) sin&theta; + (y － ycenter) cos&theta; + ycenter.</p>
+<p class="outline-text-4">C代码： </p>
+<div class="outline-text-4">
+<pre><span style="color: #0000ff;">void</span> rotate(
+      <span style="color: #0000ff;">unsigned</span> <span style="color: #0000ff;">char</span>* inbuf,
+      <span style="color: #0000ff;">unsigned</span> <span style="color: #0000ff;">char</span>* outbuf,
+      <span style="color: #0000ff;">int</span> w, <span style="color: #0000ff;">int</span> h,
+      <span style="color: #0000ff;">float</span> sinTheta,
+      <span style="color: #0000ff;">float</span> cosTheta)
+{
+   <span style="color: #0000ff;">int</span> i, j;
+   <span style="color: #0000ff;">int</span> xc = w/2;
+   <span style="color: #0000ff;">int</span> yc = h/2;
+   <span style="color: #0000ff;">for</span>(i = 0; i &lt; h; i++)
+   {
+     <span style="color: #0000ff;">for</span>(j=0; j&lt; w; j++)
+     {
+       <span style="color: #0000ff;">int</span> xpos =  (j-xc)*cosTheta - (i - yc) * sinTheta + xc;
+       <span style="color: #0000ff;">int</span> ypos =  (j-xc)*sinTheta + (i - yc) * cosTheta + yc;
+       <span style="color: #0000ff;">if</span>(xpos&gt;=0&amp;&amp;ypos&gt;=0&amp;&amp;xpos&lt;w&amp;&amp;ypos&lt;h)
+          outbuf[ypos*w + xpos] = inbuf[i*w+j];
+     }
+   }
+}</pre>
+</div>
+<div class="outline-text-4"><br />OpenCL C kernel代码：</div>
+<div class="outline-4">
+<pre>#pragma OPENCL EXTENSION cl_amd_printf : enable
+__kernel  <span style="color: #0000ff;">void</span> image_rotate(
+      __global uchar * src_data,
+      __global uchar * dest_data,        <span style="color: #008000;">//Data in global memory</span>
+      <span style="color: #0000ff;">int</span> W,    <span style="color: #0000ff;">int</span> H,                   <span style="color: #008000;">//Image Dimensions</span>
+      <span style="color: #0000ff;">float</span> sinTheta, <span style="color: #0000ff;">float</span> cosTheta )   <span style="color: #008000;">//Rotation Parameters</span>
+{
+   <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> ix = get_global_id(0);
+   <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">int</span> iy = get_global_id(1);
+   <span style="color: #0000ff;">int</span> xc = W/2;
+   <span style="color: #0000ff;">int</span> yc = H/2;
+   <span style="color: #0000ff;">int</span> xpos =  ( ix-xc)*cosTheta - (iy-yc)*sinTheta+xc;
+   <span style="color: #0000ff;">int</span> ypos =  (ix-xc)*sinTheta + ( iy-yc)*cosTheta+yc;
+   <span style="color: #0000ff;">if</span> ((xpos&gt;=0) &amp;&amp; (xpos&lt; W)   &amp;&amp; (ypos&gt;=0) &amp;&amp; (ypos&lt; H))
+      dest_data[ypos*W+xpos]= src_data[iy*W+ix];
+}</pre>
+</div>
+<div class="outline-4"><br /><span style="font-size: medium;">旋转45度</span></div>
+<div class="outline-4"><a href="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702168576.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="sky_rot" src="http://images.cnblogs.com/cnblogs_com/wangshide/201201/201201071702176907.jpg" alt="sky_rot" width="672" height="280" border="0" /></a></div>
+<div class="outline-text-4">&nbsp;</div>
+<p class="outline-text-4">&nbsp;</p>
+</div>
+<div id="outline-container-4.3" class="outline-3">
+<h3 id="sec-4.3"><span style="font-size: small;"><span style="font-weight: normal;">正如上面代码中所给出的那样，在C代码中需要两重循环来计算横纵坐标上新的 坐标位置。其实，在图像旋转的算法中每个点的计算可以独立进行，与其它点的 坐标位置没有关系，所以并行处理较为方便。OpenCL C kernel代码中用了并行 处理。</span></span></h3>
+</div>
+<div id="outline-container-4.4" class="outline-3">
+<div id="text-4.4" class="outline-text-3">
+<p>上面的代码在Intel的OpenCL平台上进行了测试，处理器为双核处理器，图像大小 为4288*3216，如果用循环的方式运行时间稳定在0.256s左右，而如果用OpenCL C kernel并行的方式，运行时间稳定在0.132秒左右。GPU的测试在NVIDIA的GeForce G105M显卡 上进行，运行时间稳定在0.0810s左右。从循环的方式，双核CPU并行以及GPU并行计算 已经可以看出，OpenCL编程的确能大大提高执行效率。 </p>
+</div>
+</div>
+</div>
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 总结 </h2>
+<div id="text-5" class="outline-text-2">
+<p>通过对OpenCL编程的分析和实验可以得出，用OpenCL编写的应用具有很好的移 植性，能在不同的设备上运行。OpenCL C kernel一般用并行的方式处理，所以能极大地提高程序的运行效率。 </p>
+<p>异构并行计算变得越来越普遍，然而对于现今存在的OpenCL版本来说，的确还存在 很多不足，例如编写内核，需要对问题的并行情况做较为深入的分析，对于内存的 管理还是需要程序员来显式地申明、显式地在主存和设备的存储器之间进行移动， 还不能完全交给系统自动完成。从这些方面，OpenCL的确还需加强，要使得人们能高 效而又灵活地开发应用，还有很多工作要完成。 </p>
+</div>
+</div>
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 参考文献 </h2>
+<div id="text-6" class="outline-text-2">
+<p>【1】 Aaftab Munshi. The OpenCL Specification Version1.1 Document Revision:44[M]. Khronos OpenCL Working Group. 2011.6.1. </p>
+<p>【2】Aaftab Munshi. 倪庆亮译. OpenCL规范 Version1.0 Document Revision:48[M]. Khronos OpenCL Working Group. 2009.10.6. </p>
+<p>【3】Aaftab Munshi, Benedict R. Gaster, Timothy G. Mattson, James Fung, Dan Ginsburg. OpenCL Programming Guide [M]. Addison-Wesley Professional. 2011.7.23. </p>
+<p>【4】Benedict Gaster, Lee Howes, David R. Kaeli and Perhaad Mistry. Heterogeneous Computing with OpenCL[M]. Morgan Kaufmann, 1 edition. 2011.8.31. </p>
+<p>【5】Slo-Li Chu, Chih-Chieh Hsiao. OpenCL: Make Ubiquitous Supercomputing Possible[J]. IEEE International Conference on High Performance Computing and Communications. 2010 12th 556-561. </p>
+<p>【6】John E. Stone, David Gohara, Guochun Shi. OpenCL: A parallel programming standard for heterogeneous computing systems[J]. Copublished by the IEEE CS and the AIP. 2010.5/6 66-72. </p>
+<p>【7】Kyle Spafford, Jeremy Meredith, Jeffrey Vetter. Maestro:Data Orchestration and Tuning for OpenCL Devices[J]. P. D'Ambra,M.Guarracino, and D.Talia (Eds.):Euro-Par 2010,Part II,LNCS6272, pp. 275&ndash;286, 2010. \copyright Springer-Verlag Berlin Heidelberg 2010. </p>
+</div>
+</div>
+<div id="postamble">
+<h4>&nbsp;</h4>
+<h5>Author: Let it be!</h5>
+<h5>Date: 2011-11-13 00:12:07 </h5>
+<p><strong>Copyright reserved.</strong></p>
+<p class="date">&nbsp;</p>
+<p class="creator">HTML generated by org-mode 6.35i in emacs 24</p>
+</div>
+</div></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+
+
+		</div>
+		<div class = "postDesc">posted @ <span id="post-date">2012-01-07 17:02</span> <a href='http://www.cnblogs.com/wangshide/'>Let it be!</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href ="http://i.cnblogs.com/EditPosts.aspx?postid=2315830" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(2315830);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=false,isLogined=false,cb_blogId=97272,cb_entryId=2315830,cb_blogApp=currentBlogApp,cb_blogUserGuid='636b5f24-52df-e011-8ee0-842b2b196315',cb_entryCreatedDate='2012/1/7 17:02:00';loadViewCount(cb_entryId);</script>
+	
+</div><!--end: topics 文章、评论容器-->
+<a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" id="lnk_RefreshComments" onclick="return RefreshCommentList();">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+<div id="comment_form_container"></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="site_nav_under"><a href="http://www.cnblogs.com/" target="_blank" title="开发者的网上家园">博客园首页</a><a href="http://q.cnblogs.com/" target="_blank" title="程序员问答社区">博问</a><a href="http://news.cnblogs.com/" target="_blank" title="IT新闻">新闻</a><a href="http://home.cnblogs.com/ing/" target="_blank">闪存</a><a href="http://job.cnblogs.com/" target="_blank">程序员招聘</a><a href="http://kb.cnblogs.com/" target="_blank">知识库</a></div>
+<div id="opt_under_post"></div>
+<script type="text/javascript">
+    var enableGoogleAd = canShowAdsense(); var googletag = googletag || {}; googletag.cmd = googletag.cmd || [];
+    fixPostBodyFormat();
+</script>
+<div id="ad_under_post_holder">
+<script type='text/javascript'>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    (function () {
+        if (enableGoogleAd) {
+            var gads = document.createElement('script');
+            gads.async = true;
+            gads.type = 'text/javascript';
+            var useSSL = 'https:' == document.location.protocol;
+            gads.src = (useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js';
+            var node = document.getElementsByTagName('script')[0];
+            node.parentNode.insertBefore(gads, node);
+        }
+    })();
+</script>
+<script type='text/javascript'>
+    try {
+        if (enableGoogleAd) {
+            googletag.cmd.push(function () {
+                googletag.defineSlot('/1090369/cnblogs_blogpost_C1_sitehome', [300, 250], 'div-gpt-ad-1346480159711-0').addService(googletag.pubads());
+                googletag.defineSlot('/1090369/cnblogs_blogpost_C2', [468, 60], 'div-gpt-ad-1410860226396-0').addService(googletag.pubads());
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+            });
+        };
+    } catch (e) { }
+</script>
+<div id="google_ad_c1" class="c_ad_block">
+    <div id='div-gpt-ad-1346480159711-0' style='width:300px; height:250px;'>
+    <script type='text/javascript'>
+        try {
+            if (enableGoogleAd) {
+                googletag.cmd.push(function () { googletag.display('div-gpt-ad-1346480159711-0'); });            
+            } else {
+                $('#div-gpt-ad-1346480159711-0').hide();
+            }
+    } catch (e) { }
+    </script>
+    </div>
+</div>
+</div>
+<div id="under_post_news"></div>
+<div id="google_ad_c2" class="c_ad_block">
+<div id='div-gpt-ad-1410860226396-0' style='width:468px; height:60px;'>
+<script type='text/javascript'>
+try {
+    if (enableGoogleAd) {
+        googletag.cmd.push(function () { googletag.display('div-gpt-ad-1410860226396-0'); });
+    } else {
+        $('#div-gpt-ad-1346480159711-0').hide();
+    }
+} catch (e) { }
+</script>
+</div>
+</div>
+<div id="under_post_kb"></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+$(function () {
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 200);
+});
+</script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+			<div id="calendar"><div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script></div>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright &copy;2015 Let it be!
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+<!--PageEndHtml Block Begin-->
+<div class="menu" style="position:absolute;top:0%;right:0%;">
+<a  style="color:#646464; " href="http://www.cnblogs.com/wangshide/archive/2011/10/16/2214454.html";> About </a>
+</div>
+<!--PageEndHtml Block End-->
+</body>
+</html>

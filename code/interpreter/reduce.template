@@ -1,0 +1,141 @@
+void generateListPrepare
+
+ORIGINAL_LIST = $?parallel_array_var?
+ORIGINAL_LIST_LENGTH = $#ORIGINAL_LIST
+
+DEVICE_IP = `{cat device_ip}
+LIST_NUMBER = $#DEVICE_IP
+
+TEMP_Q = ${expr $ORIGINAL_LIST_LENGTH $LIST_NUMBER '/'}
+TEMP_R = ${expr $ORIGINAL_LIST_LENGTH $LIST_NUMBER '%'}
+
+if {~ ${expr $TEMP_R} 0} {
+	for i in ${expr 1 $LIST_NUMBER seq} {
+		LIST_LENGTH = ($LIST_LENGTH $TEMP_Q)
+	}
+} {
+	for i in ${expr 1 $TEMP_R seq} {
+		LIST_LENGTH = ($LIST_LENGTH ${expr $TEMP_Q 1 '+'})
+	}
+	
+	for i in ${expr ${expr $TEMP_R 1 '+'} $LIST_NUMBER seq} {
+		LIST_LENGTH = ($LIST_LENGTH $TEMP_Q)
+	}
+}
+
+end
+
+void generateDevideListLoop
+
+(LENGTH?i_var?  LIST_LENGTH) = $LIST_LENGTH
+for i in ${expr 1 $LENGTH?i_var?  seq} {
+	(FIRST ORIGINAL_LIST) = $ORIGINAL_LIST
+	LIST?parallelID_var?_?i_var? = ($LIST?parallelID_var?_?i_var? $FIRST)
+}
+
+end
+
+void generateIO_logPartLoop_cannotWrite
+
+subfn cannotWrite?parallelID_var?_?i_var? { 
+	if {! ~ $mode?parallelID_var?_?i_var? ''} {
+		result = 1
+	} {
+		result = 0
+	} 
+}
+
+end
+
+void generateIO_logPartLoop_file2chan
+
+file2chan /tmp/sharedPool?parallelID_var?_?i_var? {
+	if {~ ${rget offset} 0} {
+		if {~ $mode?parallelID_var?_?i_var? 'get'} {
+			if {~ $#LIST?parallelID_var?_?i_var? 0} {
+				while {! ~ ${rget offset} 0} {}
+				echo done | putrdata
+				leftwork?i_var? = `{ls /pool/*.working?i_var?}
+				if {~ $#leftwork?i_var? 0} {
+					touch /pool/finish?i_var? 
+				}
+			} { 
+				while {! ~ ${rget offset} 0} {}
+				(FIRST?i_var? LIST?parallelID_var?_?i_var?) = $LIST?parallelID_var?_?i_var?
+				echo $FIRST?i_var? | putrdata
+				touch /pool/$client_pid?i_var?.working?i_var? 
+			}
+			mode?parallelID_var?_?i_var? = '' 
+		}
+	} {
+		rread ''
+	}
+} {
+	if {~ ${cannotWrite?parallelID_var?_?i_var?} 1} {
+	} {
+		(client_pid?i_var? mode?parallelID_var?_?i_var? ANSWER?i_var?) = `{fetchwdata}
+		if {~ $mode?parallelID_var?_?i_var? 'put'} {
+			echo from $client_pid?i_var? current answer is $ANSWER?i_var? >> $hostLogPath
+			echo $ANSWER?i_var? > /pool/RESULT_FILE?parallelID_var?_?i_var?
+			rm /pool/$client_pid?i_var?.working?i_var?
+			mode?parallelID_var?_?i_var? = ''
+		}
+		touch /pool/$client_pid?i_var?
+	}
+}
+
+end
+
+void generateHostTail_exe
+
+fn checkHost {
+    if {~ $#host 0} {
+        echo please give me the hostname >> $hostLogPath
+        raise args
+    }
+}
+
+fn readyHost{
+    count = 0
+    for hostname in $host {
+        cpu $hostname sh /n/client/parallel/device?i_var?.sh /n/client/tmp/sharedPool?parallelID_var?_^$count&
+        count = ${expr $count 1 '+'}
+    }
+}
+
+checkHost
+readyHost
+
+end
+
+void generateHostTail_process
+
+ACC = `{cat /pool/RESULT_FILE?parallelID_var?_0} 
+
+RESULT_NUMBER = ${expr $LIST_NUMBER 1 '-'}
+
+if {~ $RESULT_NUMBER 0} {} { 
+    for i in ${expr 1 $RESULT_NUMBER seq} { 
+	    ADDER = `{cat /pool/RESULT_FILE?parallelID_var?_$i} 
+	    ACC = ${?parallel_function_parallelID_var? $ACC $ADDER} 
+    }
+}
+
+?parallel_output_parallelID_var? = $ACC 
+
+end
+
+void generateDeviceReduceTail
+
+	DATA = $current
+	if {~ $flag 0} {
+		ANS = $DATA
+		flag = 1
+	} {
+		ANS = ${?parallel_function_deviceCount_var? $ANS $DATA} 
+	} 
+	echo $current put_ans : $ANS >> $workerLogPath 
+	${writeRequest 'put' $ANS} 
+} 
+
+end

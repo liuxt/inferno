@@ -1,0 +1,156 @@
+void generateHostMapParallel
+
+
+host = `{cat device_ip}
+sharedPath = /n/client/tmp/sharedPool?i_var?_0
+mode = ''
+hostLogPath = /pool/host.log
+  
+
+ARRAY = $?parallel_array_var? 
+LENGTH = 0
+LIST = ''
+RESULT_LIST = ''
+  
+
+subfn cannotWrite {
+    if {! ~ $mode ''} {
+           result = 1;
+       } {
+           result = 0;
+    }
+}
+
+
+file2chan /tmp/sharedPool?i_var?_0 {
+    if {~ ${rget offset} 0} {
+           if {~ $mode 'get'} {
+                  if {~ $#ARRAY 0} {
+                         echo $LENGTH > /pool/length
+                         rest = `{ls /pool/*.data}
+                         if {~ $#rest 0} {
+                            while {! ~ ${rget offset} 0} {}
+                            echo done | putrdata
+                            touch /pool/finish
+                         } {
+                            (first rest) = $rest
+                            LeftTask = `{sed '1q' < $first}
+                            touch /pool/$client_pid.data
+                            echo $LeftTask > /pool/$client_pid.data
+                            while {! ~ ${rget offset} 0} {}
+                            echo $LeftTask | putrdata
+                            }
+                  } { 
+                         while {! ~ ${rget offset} 0} {}
+                                   (FIRST ARRAY) = $ARRAY 
+                                   PUTDATA = ($LENGTH $FIRST)
+                               echo $PUTDATA | putrdata
+                               touch /pool/$client_pid.data
+                               echo $PUTDATA > /pool/$client_pid.data
+                               LENGTH = ${expr $LENGTH 1 '+'} 
+                  } 
+                 mode = '' 
+           }
+   } {
+          rread '';
+   }
+} {
+    if {~ ${cannotWrite} 1} {
+       } {
+            (client_pid mode ANSWER) = `{fetchwdata}
+            if {~ $mode 'put'} {
+            	if {ftest -e /pool/$client_pid.data} {
+                LIST = ($LIST $ANSWER)
+                echo from $client_pid current answer is $LIST >> $hostLogPath
+                rdata = `{sed '1q' < /pool/$client_pid.data}
+                rm /pool/$client_pid.data
+                tasklist = `{ls /pool/*.data}
+                for i in $tasklist {
+                    idata = `{sed '1q' < $i}
+                    if {~ $idata $rdata} {
+                        rm $i
+                    }
+                }
+            }
+            echo $LIST > /pool/list
+                mode = ''
+        }
+                touch /pool/$client_pid
+    }
+}
+fn checkHost {
+    if {~ $#host 0} {
+        echo please give me the hostname >> $hostLogPath
+        raise args
+    }
+}
+fn readyHost?i_var? {
+    for hostname in $host {
+        cpu $hostname sh /n/client/parallel/device?i_var?.sh $sharedPath&
+    }
+}
+
+checkHost
+readyHost?i_var?
+
+while {! ftest -e /pool/finish} {
+
+}
+
+LIST = `{cat /pool/list}
+LENGTH = `{cat /pool/length}
+
+while {ftest -e /pool/finish} {
+        rm /pool/finish
+}
+
+while {ftest -e /pool/list} {
+        rm /pool/list
+}
+
+while {ftest -e /pool/length} {
+        rm /pool/length
+}
+
+for COUNT in ${expr 0 ${expr $LENGTH 1 '-'} seq} {
+        tag = 1
+        flag = 0
+        for ITEM in $LIST {
+                if {~ $tag 1} {
+                        if {~ $ITEM $COUNT} {
+                             flag = 1
+                        }
+                        tag = 0
+                        raise continue
+                } {~ $tag 0} {
+                        if {~ $flag 1} {
+                                RESULT_LIST = ($RESULT_LIST $ITEM)
+                                flag = 0
+                        }
+                        tag = 1
+                        raise continue
+                }
+        }
+}
+
+
+?parallel_array_var? = $RESULT_LIST
+tmp = 0
+(tmp ?parallel_array_var?) = $?parallel_array_var?
+
+
+end
+
+
+void generateDeviceMapTail
+
+
+(TAP DATA) = $current
+ANS = ${?parallel_function_var? $DATA}
+current_ans = ($TAP $ANS)
+echo $current put_ans : $current_ans >> $workerLogPath
+${writeRequest 'put' $current_ans}
+}
+
+end
+

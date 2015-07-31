@@ -1,0 +1,388 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><title>Debu.gs:  Inferno Part 2:  Let&#39;s Make a Cluster!</title><link rel="stylesheet" media="all" href="/static/stylesheet.css"></link>
+<link rel="alternate" type="application/rss+xml" title="Debu.gs Blog RSS" href="http://debu.gs/blog/feed.rss"></link>
+</head><body><div class="header"><h2 class="tagline">It&#39;s user error.</h2><h1><a href="/">Debu.gs</a></h1></div><hr class="stupid"></hr><div class="navbar"><div class="navlist"><h2>Navigate</h2><ul><li class="nav-entry"><a href="/">Top</a></li><li class="nav-entry"><a href="/blog/archives">All Entries</a></li><li class="nav-entry"><a href="http://debu.gs/blog/feed.rss">RSS</a></li><li class="nav-entry"><a href="/code">Code</a></li><li class="nav-entry"><a href="/about">About</a></li></ul></div><div class="navlist"><h2>GitHub</h2><ul><li class="nav-entry"><a href="http://github.com/pete/pez">pez</a></li><li class="nav-entry"><a href="http://github.com/pete/roboto">roboto</a></li><li class="nav-entry"><a href="http://github.com/pete/watts">watts</a></li><li class="nav-entry"><a href="http://github.com/pete/hoshi">hoshi</a></li><li class="nav-entry"><a href="http://github.com/pete/senga">senga</a></li><li class="nav-entry"><a href="http://github.com/pete/euler">euler</a></li></ul></div><div class="navlist"><h2>Tags</h2><ul><li class="nav-entry"><a href="/tags/awk">awk</a></li><li class="nav-entry"><a href="/tags/c">c</a></li><li class="nav-entry"><a href="/tags/code">code</a></li><li class="nav-entry"><a href="/tags/forth">forth</a></li><li class="nav-entry"><a href="/tags/historic">historic</a></li><li class="nav-entry"><a href="/tags/hoshi">hoshi</a></li><li class="nav-entry"><a href="/tags/inferno">inferno</a></li><li class="nav-entry"><a href="/tags/pez">pez</a></li><li class="nav-entry"><a href="/tags/plan9">plan9</a></li><li class="nav-entry"><a href="/tags/ruby">ruby</a></li><li class="nav-entry"><a href="/tags/site-news">site-news</a></li><li class="nav-entry"><a href="/tags/views">views</a></li><li class="nav-entry"><a href="/tags/wiki">wiki</a></li></ul></div></div><div class="content"><div class="blog-entry"><h2><a href="/entries/inferno-part-2-let-s-make-a-cluster">Inferno Part 2:  Let&#39;s Make a Cluster!</a></h2><span class="byline">Pete Elmore, 2012-06-20 05:07</span><p>Now that the shell&#8217;s mostly covered in the <a href="/entries/inferno-part-1-shell">previous entry</a>, we&#8217;re going to have some fun!</p>
+<h3>&#8220;But the shell was pretty fun!&#8221;</h3>
+<p>But the network is the computer!  So let&#8217;s build a cluster.  After some introductions, we&#8217;ll cover the initial setup, and finally show how to use the it with a few simple examples: interacting with remote namespaces, using <a href="http://man.cat-v.org/inferno/1/cpu">cpu(1)&zwnj;</a> to run processes remotely, sharing home directories across the network, sharing a <em>clipboard</em> across several machines, and parallelizing computations across machines with <a href="http://man.cat-v.org/inferno/1/cpu">cpu(1)&zwnj;</a> and <a href="http://man.cat-v.org/inferno/1/sh-file2chan">file2chan(1)&zwnj;</a>.</p>
+<h3>Where Inferno Gets Really Interesting</h3>
+<p>It&#8217;s here.  The shell is the best shell ever, Limbo is a great language, the Dis VM is lightweight and speedy, but the really interesting part is a design feature:  networking and distributed computing are built into the OS at a fundamental level.</p>
+<p>It&#8217;s a bit difficult to convey exactly how this affects everything you do unless you use the operating system, but if you can imagine the time and effort that went into scp, for example, you&#8217;ll have an idea.  In Inferno, networking is built in (and the <span class="caps">API</span> is nicer than <span class="caps">BSD</span> sockets, but that&#8217;s a bit subjective), so you don&#8217;t need to write any special networking code.  The OS handles authentication and encryption for 9P connections, so no need to add that to your code.  Inferno handles, in fact, everything you need to handle besides the file copying, which is neatly handled by cp without additional arguments.</p>
+<p>Not just scp, either, but no software needs to be particularly aware of networks, authentication, encryption, or nearly anything related to distributed computing.  scp, sftp, ssh, rsync, MapReduce, Hadoop, nearly every specialized client and several servers go away, because external resources are decoupled from the clients that make use of them, and the network is decoupled from servers.  That is to say, clients and servers need not integrate code to deal with the network, and often do not need to know that there <em>is</em> a network.</p>
+<p>You have to use it for any of that to sink in, but if you can recall the first time you really &#8220;got&#8221; Forth/Lisp/Unix/FP, then you have an idea what it&#8217;s like.  (There is, incidentally, a <a href="http://code.google.com/p/inferno-scheme/source/list">Scheme implementation for Inferno</a> if you are a fan of Scheme.)  So, like before, I&#8217;ll try to make things example-heavy, and I recommend you install Inferno in a couple of places so you can try out the examples yourself and play with them.</p>
+<h4>Just a note about architecture and a couple of conventions</h4>
+<p>The traditional Inferno network (as well as Plan 9) keeps resources separated.  You put big CPUs and lots of <span class="caps">RAM</span> in the <span class="caps">CPU</span> servers, the large disks in the fileserver, and the nice I/O devices on the terminals.  The <span class="caps">CPU</span> servers and terminals are often diskless and boot from the network, mounting their root filesystems from the file server.  Of course, this is less likely for hosted Inferno, but this is roughly the configuration for which Inferno was designed.</p>
+<p>This isn&#8217;t the only configuration, but it does tend to be the optimal one for Serious Business.  As I am running my web/mail/<span class="caps">DNS</span>/etc. servers <a href="/entries/in-which-are-discussed-hosting-and-wikis">inside my house</a> and I tend to <a href="http://kmandla.wordpress.com/2010/10/27/more-reasons-to-learn-from-old-computers/">find uses for old computers</a> rather than tossing or selling them, my house is a bit overrun with machines, more than a few of them franken-PCs.  The &#8220;main&#8221; one is the desktop, with all the <span class="caps">RAM</span>/<span class="caps">CPU</span>/disk, the other ones are usually either clients that talk to the main one over ssh, or use it as a file server for music and movies.  This is the home equivalent of the traditional Unix architecture:  one big machine, several &#8220;terminals&#8221;.</p>
+<p>Luckily, Inferno is flexible enough that it can handle all of that, but the OS itself makes no assumptions about how the network is architected.</p>
+<p>For the sake of making sense, I&#8217;m going to write as if these were all separate, and by convention name machines things after their function (e.g., <code>auth1</code>, <code>terminal</code>, etc.).  They may be different machines, different instances of Inferno on the same machine, or even the same instance of Inferno, depending on how you set things up.  To avoid having to make distinctions without differences, it&#8217;s clearer and less confusing to talk about &#8220;logical machines&#8221; named after their function.</p>
+<p>You&#8217;ll also need to know about a couple of conventional pathnames.  <code>/n</code> is usually used for arbitrary remote services, and <code>/mnt</code> for services exported by local programs.  Thanks to the magic of <a href="http://man.cat-v.org/inferno/4/mntgen">mntgen(4)&zwnj;</a>, the mountpoints themselves need not exist.  You can set it up and play with it like this:</p>
+<pre><code>; mount -a {mntgen} /n
+; mount -a {mntgen} /mnt
+; ls -ld /n/arbitrary-dirname
+d-r-xr-xr-x M 2 me me 0 Dec 31  1969 /n/arbitrary-dirname</code></pre>
+<p>The <a href="http://man.cat-v.org/inferno/1/ls">ls(1)&zwnj;</a> command (or any other process that tries to read <code>/n/arbitrary-dirname</code>) will see an empty, read-only directory.  If you mount something on it, then the directory will persist in memory.  I&#8217;m going to assume that you either have set up <code>mntgen</code> for those directories or you know how to operate <a href="http://man.cat-v.org/inferno/1/mkdir">mkdir(1)&zwnj;</a> when presented with a complaint from the OS that a mountpoint doesn&#8217;t exist.</p>
+<p>Usually, you set up mntgen in your initialization scripts (preferably in the initialization script you pass to <a href="http://man.cat-v.org/inferno/1/emu">emu(1)&zwnj;</a> when starting Inferno <code>/lib/sh/profile</code>, <code>/lib/wmsetup</code>, or <code>$home/lib/wmsetup</code>).  Inferno is very sparing with its defaults.</p>
+<p>You&#8217;ll also need to startup the networking services if you want any of this to work:</p>
+<pre><code>; ndb/cs
+; ndb/dns</code></pre>
+<p>It&#8217;s recommended you add those to the startup, too.  Since this is the sort of thing that need occur only once, you might prefer to pass it in the startup script, since presumably you will spawn more than one shell and you can spawn more than one window manager:</p>
+<p><img src="http://static.debu.gs/wm-in-your-wm.gif" alt="" /></p>
+<p>Authentication in Inferno is designed very differently than in Unix; it&#8217;s even different than in Plan 9.  <a href="http://www.vitanuova.com/inferno/man/2/security-0intro.html">There</a> are <a href="http://doc.cat-v.org/inferno/historical_documents/website/security">plenty</a> of <a href="http://doc.cat-v.org/inferno/historical_documents/website/security2">papers</a> on that topic for the interested.  In the interests of staying on topic (practical usage) and only presenting things that I am reasonably certain I will present competently, I&#8217;ll keep my discussion of the innards minimal.</p>
+<h3>Trivially</h3>
+<p>You may remember this from <a href="/entries/inferno-part-0-namespaces">Part 0</a>.</p>
+<p>On <code>disk1</code>:</p>
+<pre><code>; mount -c {memfs -s} /n/mem
+; echo something &gt; /n/mem/asdf
+; listen -A 'tcp!*!1234' { export /n/mem &amp; }</code></pre>
+<p>On <code>terminal</code>:</p>
+<pre><code>; mount -Ac 'tcp!disk1!1234' /n/remotememfs
+; cat /n/remotememfs/asdf
+something</code></pre>
+<p>This ignores authentication (which we&#8217;ll get to), but what you have there is two lines of shell script to expose a key-value store to the network, considerably less code than <a href="http://memcached.org/">memcached</a>.  NoSQL is easier to implement than most people think!  (I am only sort of joking here.)  If you have a Linux system handy, you can access the (unauthenticated) Inferno filesystems with <a href="http://sqweek.net/code/9mount/download">9mount</a>:</p>
+<pre><code>$ mkdir /tmp/memfs
+$ 9mount -i 'tcp!disk1!1234' /tmp/memfs</code></pre>
+<p>If you&#8217;re not on Linux and don&#8217;t mind using a client library rather than mounting the filesystem directly, there are <a href="http://9p.cat-v.org/implementations">several 9P implementations</a> (like <a href="http://repo.cat-v.org/libixp/">libixp</a>).</p>
+<h3>Authentication</h3>
+<p>Let&#8217;s get the computers to talk to each other securely!</p>
+<p>Processes that want to securely use services provided by other processes use certificates to authenticate with those services.  The services will ask an authentication server to verify the certificate, and the authentication server will (provided the certificate is valid) tell the service who the user is.  You can have these arbitrarily split up; see <code>/lib/ndb/local</code> for the local setup, although these examples will work without modifying that file.</p>
+<h4>Initial setup</h4>
+<p>You&#8217;ll need an auth server first.  We&#8217;ll call it <code>auth1</code>.  Any instance of Inferno can be an auth server, any user can run an auth server, etc.  Here&#8217;s how you set it up:</p>
+<pre><code>; auth/createsignerkey `{cat /dev/sysname}
+; svc/auth
+Key: 
+Confirm key: </code></pre>
+<p><a href="http://man.cat-v.org/inferno/8/createsignerkey">createsignerkey(8)&zwnj;</a> does exactly what the name suggests:  It creates a signer key.  The key ends up in /keydb/signerkey.  This command, by the way, can take a while.</p>
+<p>The next step, <a href="http://man.cat-v.org/inferno/8/svc">svc/auth(8)&zwnj;</a> is actually a brief script (that I have added a few newlines to for presentation here):</p>
+<pre><code>; cat /dis/svc/auth
+#!/dis/sh.dis -n
+load std
+or {ftest -e /net/dns} {ftest -e /env/emuhost} {ndb/dns}
+or {ftest -e /net/cs} {ndb/cs}
+or {ftest -f /keydb/signerkey} {
+    echo 'auth: need to use createsignerkey(8)' &gt;[1=2]
+    raise nosignerkey
+}
+or {ftest -f /keydb/keys} {
+    echo 'auth: need to create /keydb/keys' &gt;[1=2]
+    raise nokeys
+}
+and {auth/keyfs} {
+    listen -v -t -A 'tcp!*!inflogin' {auth/logind&amp;}
+    listen -v -t -A 'tcp!*!infkey' {auth/keysrv&amp;}
+    listen -v -t -A 'tcp!*!infsigner' {auth/signer&amp;}
+    listen -v -t -A 'tcp!*!infcsigner' {auth/countersigner&amp;}
+}
+# run svc/registry separately if des
+ired</code></pre>
+<p><a href="http://man.cat-v.org/inferno/4/keyfs">keyfs(4)&zwnj;</a> will prompt for a password, and the first time for a confirmation.  You can modify the script to load that from a file (with the usual caveats that relate to keeping things like this in a file) by changing the line with keyfs on it to this:</p>
+<pre><code>and {auth/keyfs -n /some-file-with-crazy-permissions} {</code></pre>
+<p>The block full of <a href="http://man.cat-v.org/inferno/1/listen">listen(1)&zwnj;</a>s is the important bit.  When listen gets a connection on the appropriate port, it will spawn a server to handle the request.  The numeric values for the ports can be found in <code>/lib/ndb/services</code>.  Of course, the services run without authentication, since in order to authenticate, you will need to contact those services.</p>
+<p>Next, we&#8217;ll create an account on the local machine, and then test it out by getting a key authorizing the current user to access that account:</p>
+<pre><code>; auth/changelogin $user
+new account
+secret: 
+confirm: 
+expires [DDMMYYYY/permanent, return = 11062013]: permanent
+change written
+; getauthinfo default
+use signer [$SIGNER]: localhost
+remote user name [pete]: 
+password: 
+listen: got connection on tcp!*!inflogin from 127.0.0.1!58005
+save in file [yes]: </code></pre>
+<p><a href="http://man.cat-v.org/inferno/8/changelogin">changelogin(8)&zwnj;</a> creates or modifies the keys for an account.  The password (the <code>secret:</code> prompt) must be at least eight characters long, but otherwise there are no restrictions.  You can set an expiration (the default is one year in the future) or no expiration (&#8220;permanent&#8221;).</p>
+<p><a href="http://man.cat-v.org/inferno/8/getauthinfo">getauthinfo(8)&zwnj;</a> downloads a key, which you can use to authenticate.  If you provide the correct password, you&#8217;ll have a key in <code>$home/keyring</code> named <code>default</code>, which is the default key for any random service you might encounter.  The default is to save it into a file, but if you elect not to do so, <code>getauthinfo</code> will act as a fileserver, serving a one-file directory that is mounted on top of your keydir.  If you recall <a href="/entries/inferno-part-0-namespaces">how namespaces work</a>, this means that only the current process and its descendants will be able to see the key.  In Unix terms, this is like the difference between appending your public key to <code>.ssh/authorized_keys</code> and simply logging in, but with significantly less code.</p>
+<p>After you complete the initial setup, you can start services using just <code>svc/auth</code> from now on.</p>
+<p>Let&#8217;s test it out!  Pop open two shells, and try this:</p>
+<pre><code>; listen -v 'tcp!localhost!9001' { echo $user &amp; }</code></pre>
+<p>And on the other shell,</p>
+<pre><code>; dial 'tcp!localhost!9001' { cat &gt;[1=2] }
+pete</code></pre>
+<p>Whereupon the first shell (because we passed the <code>-v</code> flag) will print the following diagnostics:</p>
+<pre><code>listen: got connection on tcp!localhost!9001 from 127.0.0.1!37298
+listen: authenticated on tcp!localhost!9001 as pete</code></pre>
+<p>Or something like them; it is likely that your username is not &#8220;pete&#8221;, and the outbound port may not be 37298.</p>
+<h3>Accessing Remote Resources</h3>
+<p>If you have two different machines running Inferno, ssh to it, open a <span class="caps">VNC</span> connection or remote desktop connection, walk over to the physical machine, bring the physical machine over next to the first one, whatever.  Get an Inferno shell on the other machine (which we&#8217;ll call the terminal) and do this:</p>
+<pre><code>; getauthinfo tcp!auth1
+use signer [$SIGNER]: auth1
+remote user name [pete]:
+password:
+save in file [yes]: no</code></pre>
+<p>By default, if you want to authenticate from the <code>terminal</code> with the machine <code>auth1</code>, commands will often use <code>$home/keyring/tcp!auth1</code>, so that&#8217;s what we call the key.  If you set up <code>auth1</code> as the only authentication server for your network, you can just add it as <code>SIGNER</code> in <code>/lib/ndb/local</code> and use <code>default</code> instead of <code>tcp!auth1</code>.  If you like your text-entry to go into boxes instead of a shell, you can also do <code>wm/getauthinfo</code>, which pops up a friendly window.</p>
+<p>Of course, you can change your mind about saving the key into a file or not; as long as <code>getauthinfo</code> is running, you can copy the key somewhere else.</p>
+<p>If you still have the <code>listen</code> command running on <code>auth1</code>, you can test authentication with the <code>dial</code> command (except, of course, that you&#8217;ll want to modify <code>localhost</code> to be whatever the hostname or IP address of <code>auth1</code> is).  You can specify the key file manually with <code>-k</code>, and you have your choice of encryption and <span class="caps">MAC</span> algorithms with <code>-a</code>.  (See <a href="http://man.cat-v.org/inferno/1/listen">dial(1)&zwnj;</a> for more information.)</p>
+<h3>Now It Gets Interesting</h3>
+<p>Back on <code>auth1</code>, in the same shell used to start <code>svc/auth</code>, try these out:</p>
+<pre><code>; svc/styx
+; svc/rstyx</code></pre>
+<p><code>svc/styx</code> runs a file server and <code>svc/rstyx</code> runs a <span class="caps">CPU</span> server.  They&#8217;re both shell scripts and both very brief:</p>
+<pre><code>; cat /dis/svc/styx
+#!/dis/sh.dis -n
+load std
+listen -v 'tcp!*!styx' {export /&amp;}    # -n?</code>
+
+<code>; cat /dis/svc/rstyx
+#!/dis/sh.dis -n
+load std
+listen 'tcp!*!rstyx'  {runas $user auxi/rstyxd&amp;}</code></pre>
+<h4>styx</h4>
+<p><code>svc/styx</code> exposes the whole (almost; <a href="http://man.cat-v.org/inferno/1/listen">listen(1)&zwnj;</a> is running without the <code>-t</code> option for &#8220;trusted&#8221; connections) namespace to anyone who can authenticate, so if you have permissions on <code>auth1</code> for a file, you can do things with that file on <code>terminal</code>:</p>
+<pre><code>; mount -k tcp!auth1 tcp!auth1!styx /n/auth1
+; cat /n/auth1/dev/sysname
+auth1</code></pre>
+<p><code>scp</code>, <code>sftp</code>, etc. are all unneeded in such an environment.  Whatever file manager you use locally can handle things nicely.  In fact, anything that interacts with files (everything in Inferno) can now talk to files on both <code>auth1</code> and <code>terminal</code>.  <a href="http://man.cat-v.org/inferno/1/grep">grep(1)&zwnj;</a>, <a href="http://man.cat-v.org/inferno/1/wc">wc(1)&zwnj;</a>, <a href="http://man.cat-v.org/inferno/1/diff">diff(1)&zwnj;</a>, the whole family.  You can open up an editor and edit two files on two different machines simultaneously, without adding code to the editor itself.  Since you can arbitrarily mangle your namespace, you can do things like this:</p>
+<pre><code>; ps
+[Elided:  all the processes running locally]
+; bind /n/auth1/prog /prog
+; ps
+[Elided:  the processes that are running on auth1!]</code></pre>
+<p>After you&#8217;ve done that, you can even fire up <a href="http://man.cat-v.org/inferno/1/deb">wm/deb(1)&zwnj;</a> to debug a remote process.  <code>wm/deb</code> doesn&#8217;t know or care if it&#8217;s debugging a local or a remote process; it just interacts with processes via the <code>/prog</code> filesystem.</p>
+<h4>rstyx</h4>
+<p><code>svc/rstyx</code> is even more fun.  It listens on the <code>rstyx</code> port and when it gets an authenticated connection, it runs the <a href="http://man.cat-v.org/inferno/8/rstyxd">rstyxd(8)&zwnj;</a> command as that user.  This enables you to use <a href="http://man.cat-v.org/inferno/1/cpu">cpu(1)&zwnj;</a> to connect to it.</p>
+<p>You can run whatever command you like (and, as with <code>mount</code>, <code>dial</code>, etc., you can specify arbitrary combinations of encryption algorithms and digests); by default it just gives you a shell.  It might look a lot like <code>ssh</code> at first glance:</p>
+<pre><code>; cpu auth1
+% lc keyring
+default
+% cat /dev/sysname
+terminal</code></pre>
+<p>Sure enough, that is exactly what&#8217;s in <code>keyring/</code> on <code>auth1</code>, but why is <code>/dev/sysname</code> telling us the shell is still running on <code>terminal</code>?  It&#8217;s not, and I&#8217;m going to ruin the surprise for you by using <a href="http://man.cat-v.org/inferno/1/ns">ns(1)&zwnj;</a>:</p>
+<pre><code>; ns | grep /dev
+bind /dev /dev
+bind -b '#^' /dev
+bind -b '#m' /dev
+bind -b '#c' /dev
+bind -a /dev /dev
+bind -b '#i' /dev
+bind /chan/cons.48 /dev/cons
+bind /chan/cons.48ctl /dev/consctl
+bind -b /n/client/dev /dev</code></pre>
+<p>See the last line?  <code>/n/client/dev</code> is mounted atop <code>/dev</code>, which means that we can&#8217;t see the host&#8217;s <code>/dev</code>, since it&#8217;s been replaced with the client&#8217;s.  You can <code>unmount /n/client/dev /dev</code>, of course, but if you&#8217;re being astute and this OS is new to you, you might have jumped out of your chair and pointed at <code>/n/client</code>, your jaw now making contact with your chest.</p>
+<p>It is exactly what it looks like:  the namespace on <code>terminal</code> has automatically been exported for our process on <code>auth1</code> and bound to <code>/n/client</code>.  In fact, if you&#8217;ve run <code>cpu</code> from the same shell that you ran the earlier <code>mount</code> on, you can do this:</p>
+<pre><code>; cat /n/client/n/auth1/dev/sysname
+auth1</code></pre>
+<h3>A Plague of <del>Flies</del> Files!</h3>
+<p>Now that we have the building blocks in place, you can probably already imagine a number of uses.</p>
+<h4>Exporting the host&#8217;s filesystem.</h4>
+<p>Inferno, you may recall, has access to the host&#8217;s filesystem via the special device <code>#U*</code>.  You can export <code>/home</code> (or, for <span class="caps">OSX</span>, <code>/Users</code>) like this:</p>
+<pre><code>; listen 'tcp!*!1337' { export '#U*/home' &amp; }</code></pre>
+<p>Or even the whole filesystem:</p>
+<pre><code>; listen 'tcp!*!31337' { export '#U*/' &amp; }</code></pre>
+<p>The connection is securely authenticated, messages are digested, encryption can be used, and the whole thing is secure.  Perhaps this still makes you uncomfortable, though.  No worries, you can turn that off using <a href="http://man.cat-v.org/inferno/1/sh-std" title="1">pctl</a>:</p>
+<pre><code>; ls -ld '#U*/'
+d-rwxr-xr-x U 5 root root 0 Apr 24 15:37 #U*/
+; load std
+; pctl nodevs
+; ls -ld '#U*/'
+ls: stat #U*/: mount/attach disallowed</code></pre>
+<p>This prevents mounting or binding new special devices.  Devices that are already mounted and in the namespace will still be accessible, of course, but you have fine-grained access to the namespace, so you can expose only what you want, from an empty read-only directory all the way up.</p>
+<h4>Shared $home</h4>
+<p>Once <code>terminal</code> can authenticate with <code>auth1</code>, you can have some initialization scripts run as part of the startup to mount home from <code>auth1</code>.  If an appropriate key for <code>auth1</code> isn&#8217;t found, run <code>getauthinfo</code> to get it, and then mount the home directory.</p>
+<p>The server to serve each user&#8217;s home might look like this:</p>
+<pre><code>listen 'tcp!*!12345' {export /usr/^$user &amp;}</code></pre>
+<p>Note that every user authenticating with <code>auth1</code> will see only their own home directory, thanks to the block running with <code>$user</code> set to the appropriate user.  (If you are curious about why home directories are in <code>/usr</code> in Inferno and Plan 9, it&#8217;s explained in an <a href="http://lists.busybox.net/pipermail/busybox/2010-December/074114.html">interesting thread on the Busybox mailing list</a>: users used to live in <code>/usr</code>, but they got moved out for reasons that are no longer relevant.)</p>
+<p>And the the fragment of the login script might look like this:</p>
+<pre><code>or {! ftest -f $home^/keyring/tcp!auth1} {getauthinfo tcp!auth1}
+mount -bc -k tcp!auth1 tcp!auth1!12345 $home
+run $home^/lib/profile</code></pre>
+<p>You could make sure the key isn&#8217;t accidentally saved on the terminal by mounting <a href="http://man.cat-v.org/inferno/4/memfs">memfs(4)&zwnj;</a> on top of <code>$home^/keyring</code>.  Since you&#8217;ll be sharing a home, you&#8217;ll already have access to the keys that you&#8217;ve saved on <code>auth1</code>, so once <code>$home</code> is mounted, you&#8217;ll have all of your keys accessible on the terminal.</p>
+<h4>Shared $home/$<span class="caps">HOME</span></h4>
+<p>If you don&#8217;t want to have a host OS <code>$HOME</code> separate from your Inferno <code>$home</code>, this is simple, too.  Assuming Inferno usernames and Unix usernames to be the same (which they need not be, necessarily):</p>
+<pre><code>bind -bc '#U*/home' /usr
+listen 'tcp!*!12345' {export /usr/^$user &amp;}</code></pre>
+<p>Now, any Inferno instance that you log into can see the same <code>$home</code>, which will also be the same as the <code>$HOME</code> you see when using the host operating system.</p>
+<h3>Never Email Yourself a Link Again</h3>
+<p>But since everything is a file, you can get more creative than those examples.  When you are looking at a website, for example, and wish to look at it on another site, there are a few solutions, none of them especially great: emailing the link to yourself, sending it to yourself via IM, pasting it into a <a href="http://www.gnu.org/software/screen/">screen</a> session, ssh&#8217;ing and remotely opening the browser (if <span class="caps">DBUS</span> doesn&#8217;t try to outsmart you&#8230;don&#8217;t laugh, try <code>firefox $some_url</code> over <code>ssh -X</code> between two Linux hosts; it makes Firefox open the link on the client&#8217;s machine for some unholy reason), using VNC&#8217;s clipboard, <code>xclip -o | ssh somewhere-else sh -c "'DISPLAY=:0 xclip'"</code>, or what have you.</p>
+<p>The clipboard is called by the unfortunate name &#8220;snarf buffer&#8221; in Inferno and Plan 9.  Naturally, it&#8217;s available as a file, and located in <code>/chan/snarf</code>, so <code>cat /chan/snarf</code> will get you the contents, and <code>echo asdf &gt;/chan/snarf</code> will put &#8220;asdf\n&#8221; into the buffer.  In hosted Inferno, it&#8217;s synchronized with the host OS&#8217;s clipboard as well.</p>
+<p>Assuming all the hosts you might want to connect to have exported <code>/</code> with <code>svc/styx</code> or by some other means:</p>
+<pre><code>mount -bc {memfs -s} /n/snarfs
+for host in `{ls -p $home^/keyring/* | grep -v '^default$'} {
+    mount -k $host $host^!styx /n/^$host
+    sb := /n/^$host/chan/snarf
+    and {ftest -f $sb} {
+        echo -n &gt;/n/snarfs/^$host
+        bind $sb /n/snarfs/^$host
+    }
+}</code></pre>
+<p>With that, you can now read and write snarf buffers at will, and since it syncs with the host OS&#8217;s clipboard, you can copy on one machine and paste on another.  You can even do this automatically:</p>
+<pre><code>psbc = ''
+while {} {
+    sbc = "{cat /chan/snarf}
+    or {cmp &lt;{echo -n $sbc} &lt;{echo -n $psbc} &gt;/dev/null} {
+        psbc = $sbc
+        for sb in /n/snarfs/* {echo -n $sbc &gt; $sb}
+    }
+    sleep 1
+}</code></pre>
+<p>This will read the contents of the snarf buffer once a second, check it against the previous contents, and write it to all of the remote buffers.  So you have the clipboard/snarf buffer synchronized everywhere!</p>
+<p>Of interest is the syntax used for <a href="http://man.cat-v.org/inferno/1/cmp">cmp(1)&zwnj;</a> (which reads files and reports whether or not they differ).  In the shell, <code>&lt;{command}</code> redirects the block&#8217;s standard output to a new file descriptor, and then replaces the argument passed with <code>/fd/N</code>, where N is the number of the file descriptor.</p>
+<p>It&#8217;s left as an exercise for the reader to figure out how to make it synchronize the remote clipboards locally without running the code on all of them.  (As I am having difficulty resisting a hint, recall that <a href="http://man.cat-v.org/inferno/1/sh-std">sh-std(1)&zwnj;</a> does a good job with lists, and changing the cmp line to loop over all of the snarf buffers would be simple.)</p>
+<h3>Distributed Processing</h3>
+<p>Now that you can see everything from anywhere (securely even!), let&#8217;s play with building a little compute cluster.  We&#8217;re going to write a painfully slow algorithm to handle a (semi-)trivial math problem:  <a href="http://projecteuler.net/index.php?section=problems&amp;id=53">Project Euler #53</a>.  Unless you&#8217;re into a math hobbyist, you don&#8217;t need to worry too much about what we&#8217;re doing or what that problem even means, because the way to implement it is simple:  we make a function <code>c(n,r) = n!/(r!*(n-r)!)</code>, where <code>r&lt;=n</code>, and we count how many values of <code>n</code> between 1 and 100 have values of <code>r</code> that exceed one million.  The important parts are that it&#8217;s simple arithmetic and that the naive version of the algorithm is slow, easy to understand, and easy to parallelize.</p>
+<h4>The non-parallel version of the program</h4>
+<p>It&#8217;s very, very slow:</p>
+<pre><code>#!/dis/sh
+load std mpexpr</code>
+ 
+<code>subfn fac {
+    (n s) := $1 1
+    while {! ~ $n 0} {
+        s = ${expr $s $n '*'}
+        n = ${expr $n 1 -}
+    }
+    result = $s
+}</code>
+ 
+<code>subfn c {
+    (n r) := $1 $2
+    nf := ${fac $n}
+    rf := ${fac $r}
+    n_rf := ${fac ${expr $n $r -}}
+    result = ${expr $nf $rf $n_rf '*' /}
+}</code>
+ 
+<code>subfn rs_for_n {
+    n := $1
+    t := 0
+    for r in ${expr 1 $n seq} {
+        c = ${c $n $r}
+        and {~ ${expr $c 1000000 '&gt;'} 1} { t = ${expr $t 1 +} }
+    }
+    result = $t
+}</code>
+ 
+<code>total = 0</code>
+ 
+<code>for i in ${expr 23 100 seq} {
+    total = ${expr ${rs_for_n $i} $total +}
+}
+echo $total</code></pre>
+<p>It takes the straightforward approach of looping from 23 to 100 for values of <code>n</code> and for each of those, it loops from 1 to <code>n</code> for values of <code>r</code>.  For each of those pairs, it checks if <code>c(n,r)</code> is greater than a million, and increments a counter if so.  At the end it spits out a total.</p>
+<p>As I said before, the main relevant parts of this are that that it is slow and, in the words of <a href="http://ftp.arl.army.mil/~mike/">Mike Muuss</a> (requiem in pax), &ldquo;<a href="http://ftp.arl.army.mil/~mike/papers/95cadsymp/sensors.html">embarrassingly parallel</a>&rdquo;.  (An aside:  Mike Muuss <a href="http://ftp.arl.army.mil/~mike/ping.html">invented ping</a>.  Maybe you have heard of ping.  His story about it is great.)</p>
+<p>I&#8217;ve saved it as 053.sh.  Let&#8217;s try it out:</p>
+<pre><code>% time sh 053.sh &gt;/tmp/the_answer_to_the_problem
+0l 57.09r 57.09t</code></pre>
+<p>Ouch.  Not at all fast.  Mission accomplished.</p>
+<h4>The parallel version</h4>
+<p>The parallel version is split into two pieces:  one script for the workers to run, and one to manage them.  Workers pull an integer out of the queue, calculate how many values of <code>r</code> exceed 1,000,000 for that value of <code>n</code>, and send that back to the host.  We could do this a number of ways.  For example, we could use <a href="http://man.cat-v.org/inferno/1/listen">listen(1)&zwnj;</a> and pass numbers through there, but (via <code>/n/client</code>) the local namespace will be available to the remote <span class="caps">CPU</span> servers, so why not take advantage of that?  One way we could do that is by mounting a <a href="http://man.cat-v.org/inferno/4/memfs">memfs(4)&zwnj;</a> filesystem over it, and coming up with a small protocol for communicating using files (e.g., the worker makes a file named <code>n.started</code>, writes a value to it, and then moves it to <code>n.finished</code>).</p>
+<p>But why do either of those, when we could be a little more explicit about our intentions, and save ourselves some code (and bugs!) while we&#8217;re at it?  As it turns out, there&#8217;s a shell module called <a href="http://man.cat-v.org/inferno/1/sh-file2chan">file2chan(1)&zwnj;</a> that gives us a basic building block for creating exactly that:  synthetic files that call a shell block for reads and writes.  The worker would be simple to write.</p>
+<h5>The worker script</h5>
+<p>It just needs to read jobs from the queue, and then write the answers back somewhere.  We&#8217;ll have it take the two files as arguments:</p>
+<pre><code>#!/dis/sh -n
+load std mpexpr</code>
+
+<code>subfn fac {
+    (n s) := $1 1
+    while {! ~ $n 0} {
+        s = ${expr $s $n '*'}
+        n = ${expr $n 1 -}
+    }
+    result = $s
+}    </code>
+
+<code>subfn c {
+    (n r) := $1 $2
+    nf := ${fac $n}
+    rf := ${fac $r}
+    n_rf := ${fac ${expr $n $r -}}
+    result = ${expr $nf $rf $n_rf '*' /}
+}</code>
+
+<code>subfn rs_for_n {
+    n := $1
+    t := 0
+    for r in ${expr 1 $n seq} {
+        c = ${c $n $r}
+        and {~ ${expr $c 1000000 '&gt;'} 1} { t = ${expr $t 1 +} }
+    }
+    result = $t
+}</code>
+
+<code>i = -1
+fn nx {
+    rescue '*' {echo '['^$h^'] Hit an error after' $i 'jobs.'; exit} {
+        n = `{sed 1q &lt; $qc}
+        i = ${expr $i 1 +}
+    }
+}</code>
+
+<code>(qc rc) = $1 $2
+h = `{os hostname}
+echo 'Started up on' $h^'!  Using queue' $qc 'and result' $rc^'.'
+nx; while {! ~ $n done} {
+    rs = ${rs_for_n $n}
+    echo '['^$h^' #'^$i^']' $n '-&gt;' $rs
+    echo $rs &gt; $rc
+    nx
+}
+echo '['^$h^']' $i 'jobs completed.'</code></pre>
+<p>The math from the beginning remains completely unchanged (in particular, we&#8217;re still using the same incredibly slow algorithm), and the new code starts with the <code>fn nx</code> line, which defines a function to fetch the next <code>n</code> from the file using sed(1) and maintain a count of the number of jobs completed.  You might notice the <code>rescue</code> block, which is executed should we get a read error from a flaky net connection.</p>
+<p>After that, it is mostly self-explanatory:  we save the arguments for the queue channel in <code>$qc</code> and for the results channel in <code>$rc</code>, and run the calculations, pausing on occasion to spit out some diagnostics.  (It does get noisy, and the <code>echo</code>&zwj;s can be commented out if you like, but take care not to comment out the one that reports results back!)  It stops when it reads &#8220;done&#8221; from the file.</p>
+<p>Overall, the worker script is pretty boring.  It reads jobs from a file and writes jobs back to another file.  But the boringness was exactly the goal here:  we don&#8217;t want to have to write something complicated just to split work up!</p>
+<h5>The master script</h5>
+<pre><code>#!/dis/sh -n
+load std mpexpr file2chan</code>
+ 
+<code>hosts = $*
+and {no $hosts} {
+	echo 'You must supply at least one host!' &gt;[1=2]; raise args
+}</code>
+ 
+<code>tocheck = ${expr 23 100 seq}
+file2chan /tmp/053-queue {
+    if {~ ${rget offset} 0} {
+        (r tocheck) = $tocheck
+        if {no $r} {rread done} {rread $r}
+    } {rread ''}
+} {}</code>
+ 
+<code>count = $#tocheck
+total = 0
+file2chan /tmp/053-result {
+    if {~ ${rget offset} 0} {echo $count $total | putrdata} {rread ''}
+} {
+    total = ${expr $total `{fetchwdata} +}
+    count = ${expr $count 1 -}
+}</code>
+ 
+<code>hpids = ()
+w = /n/client^`{pwd}^/053-worker.sh
+qc = /n/client/tmp/053-queue
+rc = /n/client/tmp/053-result
+for host in $hosts {
+    cpu $host sh $w $qc $rc &amp;
+    hpids = $hpids $apid
+}</code>
+ 
+<code>echo 'Waiting for results from' $hpids
+while {! ~ $count 0} {
+    (count result) = `{cat /tmp/053-result}
+    sleep 1
+}
+echo $result</code></pre>
+<p>Now this one is where the interesting bits live.  First off, we will need to load the <a href="http://man.cat-v.org/inferno/1/sh-file2chan">file2chan(1)&zwnj;</a> module along with the others.  Next, the argument list is read so that we know which hosts to send the work to.</p>
+<p>We use the <code>${expr}</code> builtin to get a list of the numbers from 23 to 100, and then we create the first channel:  the job queue.  <code>file2chan</code> takes the file to add to the namespace followed by two blocks:  one to execute for reads and one for writes.  Inside the read block, we check if we&#8217;re at offset zero, and we send the head of the list back across the wire if so, and return an empty read if not.  When we&#8217;re out of numbers, we send &#8220;done&#8221;.  The write block is empty; conceivably you could allow jobs to be put back into the queue in a straightforward manner.  So, when a process attempts to read that file, it&#8217;ll get a number while we have numbers to give out.  Simple enough.  (Hopefully!)</p>
+<p>Next we set up a total at zero and then a simple counter that starts with the size of the list.  The read block simply returns the values for <code>$count</code> and <code>$total</code>.  The write block updates the values based on the data written.  Still simple, right?</p>
+<p>There&#8217;s no real requirement that we send data when a process attempts to read the channel or read the data when one attempts to write it.  The blocks are regular shell blocks, and can do anything (although your programs will likely make much more sense if they don&#8217;t do just <em>anything</em>).</p>
+<p>After that, we fill some values into some variables, and we spawn one <a href="http://man.cat-v.org/inferno/1/cpu">cpu(1)&zwnj;</a> for each host passed in.  We tell <code>cpu</code> to run the script and provide the queue and result channels, and then keep the pids around.</p>
+<p>Finally, we just cat the result channel until all the jobs have finished, and then we spit out the result.</p>
+<h5>Let&#8217;s run it!</h5>
+<p>I&#8217;m running the program on three machines, including localhost.  (You&#8217;ll need to use <code>getauthinfo</code> and start up <code>rstyxd</code> as described above for each host you plan to use.)</p>
+<p>Let&#8217;s see how it looks:</p>
+<pre><code>; time sh 053-master.sh localhost tcp!cpu1 tcp!cpu2
+[So much--SO MUCH--output elided!]
+0.001l 27.35r 27.35t</code></pre>
+<p>Not too shabby for a house with flaky wifi!  You can run any number of <span class="caps">CPU</span> servers on the same machine (it may be expedient to run one per core), but you&#8217;ll have to specify the ports as well (e.g., <code>tcp!cpu1!9001</code>, <code>tcp!cpu1!9002</code>, etc.)&#8212;and remember them!  The <a href="http://man.cat-v.org/inferno/4/registry">registry(4)&zwnj;</a> and <a href="http://man.cat-v.org/inferno/4/grid-cpu">suite</a> of <a href="http://man.cat-v.org/inferno/1/grid-ns">grid</a> <a href="http://man.cat-v.org/inferno/1/grid-session">computing</a> <a href="http://man.cat-v.org/inferno/1/grid-monitor">tools</a> handle this problem.  They&#8217;ll be covered in a future post.</p>
+<h3>&#8220;Pete, are you going to write love poems about Inferno for your next entry, or what?&#8221;</h3>
+<p>This entry being both long and overdue, it&#8217;ll have to stop here.  The building blocks of distributed computing are simple enough to use in Inferno that you should be able to start playing with them right away.  If you look over the registry and grid documentation mentioned above, you can get an idea of how a framework built with these blocks looks.</p>
+<p>There are two entries in the works:  the first is a guide to using the grid tools that come with Inferno with examples (I have a couple of applications in mind, somewhat more practical than Project Euler solutions), and the second that covers more of the shell, including GUIs.  I have a few <span class="caps">ARM</span> systems (a couple of small dev boards, a netbook, some mini desktops; they&#8217;ve all gotten very cheap) and will probably have a few things to say about running Inferno on those.  Intermittently, I&#8217;ll probably be posting small but interesting hacks.</p>
+<p>I blog like <span class="caps">UDP</span> packets, so these entries are not guaranteed to arrive in order or at all.</p>
+<h3>Meanwhile, elsewhere on the web&#8230;</h3>
+<p>I&#8217;ve also <a href="http://news.ycombinator.com/item?id=4135714">put this entry on Hacker News</a>.</p>
+<p><a href="http://powerman.name/">Alex Efros</a> has produced <a href="http://habrahabr.ru/post/146076/">a translation into Russian</a> for <a href="/entries/inferno-part-0-namespaces">Part 0</a>.  (I&#8217;ve put a link to the translation in the original article.)  Thanks, Alex!</p>
+<h3>Update (2012-06-22)</h3>
+<p>Corrected a typo, <code>/lib/sh/profile</code> is the location of the profile script that runs for shells started with <code>-l</code>.</p><p class="tags">Tags:  <a href="/tags/code">code</a> <a href="/tags/inferno">inferno</a> </p><hr></hr><a href="/entries/inferno-part-1-shell" style="float: left;">&lt;&lt; Previous: &quot;Inferno Part 1:  Shell&quot;</a><br style="clear: all;">
+<a href="/entries/an-aside-about-uriel" style="float: right;">Next: &quot;An Aside about Uriel&quot; &gt;&gt;</a><br style="clear: all;">
+</div></div><br style="clear: both;">
+<div class="footer"><span class="contact">					Contact:  pete at debu dot gs
+</span><span class="phrases">Homines, dum docent, discunt.</span><br style="clear: both;">
+</div></body></html>

@@ -1,0 +1,2 @@
+ssh root@ssh.freeshell.ustc.edu.cn -p 34193
+PATH : /usr/src/inferno

@@ -1,0 +1,11 @@
+#code1 before parallel(include array and function)
+
+@parallel
+#result1# = map #array1# #function1#
+
+#code2
+
+@parallel
+#result2# = map #array2# #function2#
+
+#code3
